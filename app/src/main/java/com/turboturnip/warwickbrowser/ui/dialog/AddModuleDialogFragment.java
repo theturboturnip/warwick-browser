@@ -1,4 +1,4 @@
-package com.turboturnip.warwickbrowser;
+package com.turboturnip.warwickbrowser.ui.dialog;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -13,6 +13,9 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+
+import com.turboturnip.warwickbrowser.R;
+import com.turboturnip.warwickbrowser.Statics;
 
 import java.util.regex.Matcher;
 
@@ -34,7 +37,7 @@ public class AddModuleDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("Add Module");
+        builder.setTitle("Add Module");
         builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int which) {
@@ -47,6 +50,7 @@ public class AddModuleDialogFragment extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialogInterface, int which) {}
         });
+
         View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.add_module_dialog, null);
         final EditText dialogText = dialogView.findViewById(R.id.module_name);
         dialogText.addTextChangedListener(new TextWatcher() {
@@ -63,6 +67,7 @@ public class AddModuleDialogFragment extends DialogFragment {
             }
         });
         builder.setView(dialogView);
+
         dialog = builder.create();
         return dialog;
     }

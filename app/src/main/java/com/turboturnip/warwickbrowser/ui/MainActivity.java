@@ -1,12 +1,10 @@
-package com.turboturnip.warwickbrowser;
+package com.turboturnip.warwickbrowser.ui;
 
 import android.Manifest;
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.FileObserver;
 import android.os.Handler;
 import android.os.Message;
@@ -33,19 +31,22 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.turboturnip.warwickbrowser.db.Module;
+import com.turboturnip.warwickbrowser.Statics;
+import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleCreate;
+import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleLinkInsert;
+import com.turboturnip.warwickbrowser.ui.dialog.AddModuleDialogFragment;
+import com.turboturnip.warwickbrowser.R;
 import com.turboturnip.warwickbrowser.db.ModuleAndLinks;
 import com.turboturnip.warwickbrowser.db.ModuleDatabase;
 import com.turboturnip.warwickbrowser.db.ModuleLink;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static android.os.FileObserver.MOVED_FROM;
-import static com.turboturnip.warwickbrowser.ModuleAddLinkActivity.MODULE_ID;
+import static com.turboturnip.warwickbrowser.ui.ModuleAddLinkActivity.MODULE_ID;
 
 public class MainActivity extends AppCompatActivity implements AddModuleDialogFragment.AddModuleListener {
 
@@ -53,6 +54,10 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
     private ModuleViewAdapter moduleAdapter;
     private LinearLayoutManager moduleLayout;
     private View permissionsDialog;
+
+    private RecyclerView.RecycledViewPool modulePool = new RecyclerView.RecycledViewPool(),
+            moduleLinkPool = new RecyclerView.RecycledViewPool(),
+            moduleFilePool = new RecyclerView.RecycledViewPool();
 
     private ModuleDatabase moduleDatabase;
 
@@ -75,16 +80,17 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         permissionsDialog.setVisibility(View.GONE);
         checkPermission();
 
-        moduleHolder = findViewById(R.id.modules);
-
         moduleAdapter = new ModuleViewAdapter();
         moduleDatabase.daoModules().getModules().observe(this, moduleAdapter.moduleObserver);
-        moduleHolder.setAdapter(moduleAdapter);
-        moduleAdapter.notifyDataSetChanged();
 
         moduleLayout = new LinearLayoutManager(this);
         moduleLayout.setOrientation(LinearLayoutManager.VERTICAL);
+
+        moduleHolder = findViewById(R.id.modules);
+        moduleHolder.setRecycledViewPool(modulePool);
+        moduleHolder.setAdapter(moduleAdapter);
         moduleHolder.setLayoutManager(moduleLayout);
+        moduleAdapter.notifyDataSetChanged();
 
         findViewById(R.id.my_warwick_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,18 +101,6 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             }
         });
     }
-
-    /*private void loadFromDatabase(){
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                moduleAdapter.modules = moduleDatabase.daoModules().getModules();
-                moduleAdapter.notifyDataSetChanged();
-                return null;
-            }
-        }.execute();
-
-    }*/
 
     private static final int REQUEST_EXT_STORAGE = 0;
     private void checkPermission(){
@@ -134,10 +128,6 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                         REQUEST_EXT_STORAGE);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
             }
 
         }
@@ -150,37 +140,17 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay!
                     permissionsDialog.setVisibility(View.GONE);
                 } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
                     permissionsDialog.setVisibility(View.VISIBLE);
                 }
             }
-
-            // other 'case' lines to check for other
-            // permissions this app might request.
         }
     }
 
     @Override
     public void onModuleAdded(final String title) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                long moduleId = moduleDatabase.daoModules().insertModule(new Module(title));
-                if (title.startsWith("CS")) {
-                    moduleDatabase.daoModules().insertModuleLink(new ModuleLink(moduleId, "Home", "fac/sci/dcs/teaching/material/" + title + "/"));
-                } else if (title.startsWith("ES")) {
-                    int year = Integer.parseInt("" + title.charAt(2));
-                    if (year > 4)
-                        year = 4;
-                    moduleDatabase.daoModules().insertModuleLink(new ModuleLink(moduleId, "Home", "fac/sci/eng/eso/modules/year" + year + "/" + title + "/"));
-                }
-                return null;
-            }
-        }.execute();
+        new AsyncDBModuleCreate(moduleDatabase, title).execute();
     }
 
     @Override
@@ -190,28 +160,20 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             final String linkName = data.getStringExtra("LINK_NAME");
             final String linkTarget = data.getStringExtra("LINK_TARGET");
             Log.e("turnipwarwick", "Got data back from link selection: " + moduleId + " : " + linkName + " : " + linkTarget);
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... voids) {
-
-                    moduleDatabase.daoModules().insertModuleLink(new ModuleLink(moduleId, linkName, linkTarget));
-                    return null;
-                }
-            }.execute();
+            new AsyncDBModuleLinkInsert(moduleDatabase, new ModuleLink(moduleId, linkName, linkTarget)).execute();
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
-    // TODO: Use RecyclerView.ViewHolder.innerRecyclerView.setRecycledViewPool to make all recyclerviews of a type use the same pool
 
     private class ModuleView extends RecyclerView.ViewHolder {
         private TextView titleView;
 
-        private RecyclerView dataHolder;
-        private ModuleLinksAdapter dataAdapter;
-        private LinearLayoutManager dataLayout;
+        private RecyclerView linksHolder;
+        private ModuleLinksAdapter linksAdapter;
+        private LinearLayoutManager linksLayout;
 
-        private RecyclerView fileHolder;
+        private RecyclerView filesHolder;
         private ModuleFilesAdapter filesAdapter;
         private LinearLayoutManager filesLayout;
 
@@ -220,25 +182,27 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
 
         private boolean closed = false;
 
-        public ModuleView(@NonNull View itemView) {
+        ModuleView(@NonNull View itemView) {
             super(itemView);
             layout = itemView.findViewById(R.id.module_layout);
 
             titleView = itemView.findViewById(R.id.title);
 
-            dataHolder = itemView.findViewById(R.id.links);
-            dataAdapter = new ModuleLinksAdapter();
-            dataHolder.setAdapter(dataAdapter);
-            dataLayout = new LinearLayoutManager(itemView.getContext());
-            dataLayout.setOrientation(LinearLayoutManager.HORIZONTAL);
-            dataHolder.setLayoutManager(dataLayout);
+            linksAdapter = new ModuleLinksAdapter();
+            linksLayout = new LinearLayoutManager(itemView.getContext());
+            linksLayout.setOrientation(LinearLayoutManager.HORIZONTAL);
+            linksHolder = itemView.findViewById(R.id.links);
+            linksHolder.setRecycledViewPool(moduleLinkPool);
+            linksHolder.setAdapter(linksAdapter);
+            linksHolder.setLayoutManager(linksLayout);
 
-            fileHolder = itemView.findViewById(R.id.files);
             filesAdapter = new ModuleFilesAdapter();
-            fileHolder.setAdapter(filesAdapter);
             filesLayout = new LinearLayoutManager(itemView.getContext());
             filesLayout.setOrientation(LinearLayoutManager.VERTICAL);
-            fileHolder.setLayoutManager(filesLayout);
+            filesHolder = itemView.findViewById(R.id.files);
+            filesHolder.setRecycledViewPool(moduleFilePool);
+            filesHolder.setAdapter(filesAdapter);
+            filesHolder.setLayoutManager(filesLayout);
 
             filesOpen = new ConstraintSet();
             filesOpen.clone(layout);
@@ -259,12 +223,12 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             });
         }
 
-        public void updateContents(ModuleAndLinks data) {
+        void updateContents(ModuleAndLinks data) {
             titleView.setText(data.module.title);
-            dataAdapter.moduleData = data;
-            dataAdapter.data = data.links;
-            dataAdapter.notifyDataSetChanged();
-            filesAdapter.setDirectory(DownloadHelper.getStorageDirForModule(data.module.title).getAbsolutePath());
+            linksAdapter.moduleData = data;
+            linksAdapter.data = data.links;
+            linksAdapter.notifyDataSetChanged();
+            filesAdapter.setDirectory(Statics.getStorageDirForModule(data.module.title).getAbsolutePath());
 
             closeFiles();
         }
@@ -274,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             //transition.setDuration(1000);
             TransitionManager.beginDelayedTransition(layout, transition);
             filesClosed.applyTo(layout);
-            fileHolder.setVerticalScrollBarEnabled(false);
+            filesHolder.setVerticalScrollBarEnabled(false);
             closed = true;
         }
         private void openFiles(){
@@ -283,36 +247,36 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             //transition.setDuration(1000);
             TransitionManager.beginDelayedTransition(layout, transition);
             filesOpen.applyTo(layout);
-            fileHolder.setVerticalScrollBarEnabled(true);
+            filesHolder.setVerticalScrollBarEnabled(true);
             closed = false;
         }
     }
     private class ModuleLinkView extends RecyclerView.ViewHolder {
         private Button linkButton;
-        public ModuleLinkView(@NonNull View itemView) {
+        ModuleLinkView(@NonNull View itemView) {
             super(itemView);
             linkButton = (Button)itemView;
         }
-        public void setLink(final ModuleAndLinks moduleData, final ModuleLink link) {
+        void setLink(final ModuleAndLinks moduleData, final ModuleLink link) {
             linkButton.setText(link.title);
             linkButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(v.getContext(), ModuleWebView.class);
-                    intent.putExtra(ModuleWebView.MODULE_NAME, moduleData.module.title);
-                    intent.putExtra(ModuleWebView.REQUESTED_PATH, link.target);//"fac/sci/dcs/teaching/material/" + owner + "/");
+                    Intent intent = new Intent(v.getContext(), ModuleViewActivity.class);
+                    intent.putExtra(ModuleViewActivity.MODULE_NAME, moduleData.module.title);
+                    intent.putExtra(ModuleViewActivity.REQUESTED_PATH, link.target);
                     v.getContext().startActivity(intent);
                 }
             });
         }
-        public void setToAddLink(final ModuleAndLinks moduleData) {
+        void setToAddLink(final ModuleAndLinks moduleData) {
             linkButton.setText("+");
             linkButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(v.getContext(), ModuleAddLinkActivity.class);
                     intent.putExtra(MODULE_ID, moduleData.module.id);
-                    intent.putExtra(ModuleWebView.MODULE_NAME, moduleData.module.title);
+                    intent.putExtra(ModuleViewActivity.MODULE_NAME, moduleData.module.title);
                     MainActivity.this.startActivityForResult(intent, 0);
                 }
             });
@@ -320,11 +284,11 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
     }
     private class ModuleFileView extends RecyclerView.ViewHolder {
         private TextView textView;
-        public ModuleFileView(@NonNull View itemView) {
+        ModuleFileView(@NonNull View itemView) {
             super(itemView);
             textView = itemView.findViewById(R.id.file_name);
         }
-        public void setFile(File file) {
+        void setFile(File file) {
             textView.setText(file.getName());
 
             Uri fileURI = FileProvider.getUriForFile(MainActivity.this, "com.turboturnip.warwickbrowser.fileprovider", file);
@@ -352,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
                 }
             });
         }
-        public void setNoFile() {
+        void setNoFile() {
             textView.setText("No Files");
             textView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -361,11 +325,26 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         }
     }
 
-    private class ModuleFilesAdapter extends RecyclerView.Adapter<ModuleFileView> {
+    private static class ModuleFilesAdapterSwapFilesHandler extends Handler {
+        private final WeakReference<ModuleFilesAdapter> adapterRef;
 
+        ModuleFilesAdapterSwapFilesHandler(ModuleFilesAdapter adapter) {
+            adapterRef = new WeakReference<>(adapter);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            ModuleFilesAdapter adapter = adapterRef.get();
+            if (adapter == null) return;
+
+            adapter.files = adapter.pendingFiles;
+            adapter.notifyDataSetChanged();
+        }
+    }
+    private class ModuleFilesAdapter extends RecyclerView.Adapter<ModuleFileView> {
         private class ModuleDirectoryObserver extends FileObserver {
-            public final String directoryPath;
-            public ModuleDirectoryObserver(String directoryPath) {
+            final String directoryPath;
+            ModuleDirectoryObserver(String directoryPath) {
                 super(directoryPath);
                 this.directoryPath = directoryPath;
                 startWatching();
@@ -395,15 +374,20 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
 
             handler.sendEmptyMessage(0);
         }
-        private Handler handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                files = pendingFiles;
-                notifyDataSetChanged();
-            }
-        };
 
-        public void setDirectory(String path) {
+        private Handler handler;
+
+        ModuleFilesAdapter() {
+            handler = new ModuleFilesAdapterSwapFilesHandler(this);
+        }
+
+        @Override
+        protected void finalize() {
+            if (directoryObserver != null)
+                directoryObserver.stopWatching();
+        }
+
+        void setDirectory(String path) {
             if (directoryObserver != null)
                 directoryObserver.stopWatching();
             directoryObserver = new ModuleDirectoryObserver(path);
@@ -413,7 +397,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         @NonNull
         @Override
         public ModuleFileView onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-            return new ModuleFileView(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.module_file_item, null, false));
+            return new ModuleFileView(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.module_file_item, viewGroup, false));
         }
 
         @Override

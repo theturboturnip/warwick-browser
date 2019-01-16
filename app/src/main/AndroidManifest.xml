@@ -24,7 +24,7 @@
                 android:resource="@xml/provider_paths"/>
         </provider>
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,26 +32,19 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ModuleWebView"
+            android:name=".ui.ModuleViewActivity"
             android:label="@string/title_activity_module_web_view"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".ui.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.turboturnip.warwickbrowser.MainActivity" />
+                android:value="com.turboturnip.warwickbrowser.ui.MainActivity" />
         </activity>
-        <activity android:name=".LoginActivity"
-            android:parentActivityName=".MainActivity"
+        <activity android:name=".ui.ModuleAddLinkActivity" android:parentActivityName=".ui.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.turboturnip.warwickbrowser.MainActivity" />
-        </activity>
-        <activity android:name=".ModuleAddLinkActivity" android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.turboturnip.warwickbrowser.MainActivity" />
+                android:value="com.turboturnip.warwickbrowser.ui.MainActivity" />
         </activity>
     </application>
 

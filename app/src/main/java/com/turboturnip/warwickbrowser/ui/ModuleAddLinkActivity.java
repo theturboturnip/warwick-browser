@@ -1,18 +1,26 @@
-package com.turboturnip.warwickbrowser;
+package com.turboturnip.warwickbrowser.ui;
 
 import android.content.Intent;
-import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.CookieManager;
+import android.webkit.DownloadListener;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import static com.turboturnip.warwickbrowser.ModuleWebView.MODULE_NAME;
+import com.turboturnip.warwickbrowser.ui.dialog.AddModuleLinkDialogFragment;
+import com.turboturnip.warwickbrowser.R;
+import com.turboturnip.warwickbrowser.Statics;
+
+import static com.turboturnip.warwickbrowser.ui.ModuleViewActivity.MODULE_NAME;
 
 public class ModuleAddLinkActivity extends AppCompatActivity implements AddModuleLinkDialogFragment.AddModuleLinkListener {
     public static final String MODULE_ID = "module-id";
@@ -43,9 +51,17 @@ public class ModuleAddLinkActivity extends AppCompatActivity implements AddModul
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Statics.cookieSetup();
+
         setContentView(R.layout.activity_module_web_view);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        if (getIntent().getExtras() == null) {
+            Log.e("turnipwarwick", "ModuleAddLinkActivity created without extras");
+            finish();
+            return;
+        }
 
         moduleId = getIntent().getExtras().getLong(MODULE_ID, -1);
         moduleName = getIntent().getExtras().getString(MODULE_NAME, "no-module");
@@ -59,13 +75,19 @@ public class ModuleAddLinkActivity extends AppCompatActivity implements AddModul
         webView = findViewById(R.id.web_view);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
-        webView.setWebViewClient(new WebViewClient(){
-
+        webView.setDownloadListener(new DownloadListener() {
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                return false;
+            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
+                Snackbar.make(webView, "Can't download files in this mode.", Snackbar.LENGTH_SHORT).show();
             }
         });
+        // Required so it doesn't try to open stuff in Chrome
+        webView.setWebViewClient(new WebViewClient(){});
+        if (Build.VERSION.SDK_INT >= 21) {
+            // Third party cookies are needed for Warwick
+            CookieManager cookieManager = CookieManager.getInstance();
+            cookieManager.setAcceptThirdPartyCookies(webView, true);
+        }
         webView.loadUrl("https://search.warwick.ac.uk/website?q="+moduleName);
     }
 
@@ -79,7 +101,7 @@ public class ModuleAddLinkActivity extends AppCompatActivity implements AddModul
         Intent data = new Intent();
         data.putExtra(MODULE_ID, moduleId);
         data.putExtra("LINK_NAME", title);
-        data.putExtra("LINK_TARGET", path);//.new Uri.Builder().appendQueryParameter(MODULE_ID, ""+moduleId).appendQueryParameter("LINK_TARGET", path).build());
+        data.putExtra("LINK_TARGET", path);
         setResult(0, data);
         finish();
     }
