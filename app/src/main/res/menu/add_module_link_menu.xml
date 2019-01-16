@@ -2,10 +2,9 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-        <!-- "Mark Favorite", should appear as action button if possible -->
     <item
         android:id="@+id/action_select"
-        android:title="SELECT"
+        android:title="@string/add_module_link_option"
         app:icon="@android:drawable/checkbox_on_background"
         app:showAsAction="always|withText" />
 

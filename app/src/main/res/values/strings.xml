@@ -6,4 +6,10 @@
     <string name="write_ext_storage_request">This app requires the Write External Storage permission to download files.</string>
     <string name="give_permission">Give Permission</string>
     <string name="module_name_suggestion">Module Name (e.g. CS126, ES193)</string>
+    <string name="open_in_browser">Open in browser</string>
+    <string name="add_module_link_option">ADD</string>
+    <string name="link_name_title">Link Name</string>
+    <string name="link_target_title">Link Target</string>
+    <string name="link_name_hint">Name</string>
+    <string name="link_target_hint">Link</string>
 </resources>

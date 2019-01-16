@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="?dialogPreferredPadding">
@@ -8,25 +8,29 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Link Name" />
+        android:text="@string/link_name_title" />
 
     <EditText
         android:id="@+id/link_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="textPersonName"
-        android:text="Name" />
+        android:hint="@string/link_name_hint"
+        android:inputType="textAutoCorrect|textAutoComplete"
+        android:importantForAutofill="no" tools:targetApi="o" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Link Target" />
+        android:text="@string/link_target_title" />
 
     <EditText
         android:id="@+id/link_target"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="textNoSuggestions|textUri" />
+        android:hint="@string/link_target_hint"
+        android:importantForAutofill="no"
+        android:inputType="textNoSuggestions|textUri"
+        tools:targetApi="o" />
 </LinearLayout>

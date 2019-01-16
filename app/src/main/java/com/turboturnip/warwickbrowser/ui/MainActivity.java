@@ -42,6 +42,7 @@ import com.turboturnip.warwickbrowser.db.ModuleLink;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -454,7 +455,13 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         private Observer<List<ModuleAndLinks>> moduleObserver = new Observer<List<ModuleAndLinks>>() {
             @Override
             public void onChanged(@Nullable List<ModuleAndLinks> modules) {
-                ModuleViewAdapter.this.modules = modules;
+                if (modules == null)
+                    ModuleViewAdapter.this.modules = null;
+                else {
+                    ModuleViewAdapter.this.modules = new ArrayList<>(modules);
+                    Collections.sort(ModuleViewAdapter.this.modules, (m1, m2) -> m1.module.title.compareTo(m2.module.title));
+                }
+
                 notifyDataSetChanged();
             }
         };

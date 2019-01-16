@@ -23,13 +23,12 @@ import com.turboturnip.warwickbrowser.Statics;
 import java.io.File;
 import java.net.URI;
 
-public class ModuleViewActivity extends AppCompatActivity implements RedownloadFileDialogFragment.ShouldRedownloadListener {
+public class ModuleViewActivity extends WebViewActivity implements RedownloadFileDialogFragment.ShouldRedownloadListener {
 
     public final static String REQUESTED_PATH = "requested_url";
     public final static String MODULE_NAME = "module_name";
     private String moduleName;
     private DownloadManager downloadManager;
-    WebView webView;
 
     private class DownloadRequest {
         DownloadManager.Request request;
@@ -48,18 +47,17 @@ public class ModuleViewActivity extends AppCompatActivity implements RedownloadF
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Statics.cookieSetup();
-
-        setContentView(R.layout.activity_module_web_view);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        if (getIntent().getExtras() == null) {
+            Log.e("turnipwarwick", "ModuleViewActivity created without extras");
+            finish();
+            return;
+        }
 
         moduleName = getIntent().getExtras().getString(MODULE_NAME, "no-module");
         String targetPath = getIntent().getExtras().getString(REQUESTED_PATH, "about:blank");
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(moduleName);
         }
 
@@ -68,9 +66,6 @@ public class ModuleViewActivity extends AppCompatActivity implements RedownloadF
 
         downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
 
-        webView = findViewById(R.id.web_view);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         webView.setDownloadListener(new DownloadListener() {
             @Override
             public void onDownloadStart(final String url, final String userAgent, final String contentDisposition, final String mimetype, final long contentLength) {
@@ -100,13 +95,6 @@ public class ModuleViewActivity extends AppCompatActivity implements RedownloadF
                 tryDownload(new DownloadRequest(request, destinationUri));
             }
         });
-        // Required so it doesn't try to open stuff in Chrome
-        webView.setWebViewClient(new WebViewClient(){});
-        if (Build.VERSION.SDK_INT >= 21) {
-            // Third party cookies are needed for Warwick
-            CookieManager cookieManager = CookieManager.getInstance();
-            cookieManager.setAcceptThirdPartyCookies(webView, true);
-        }
         webView.loadUrl(targetUrl.toString());
     }
 

@@ -12,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -22,12 +21,20 @@ import com.turboturnip.warwickbrowser.Statics;
 
 import static com.turboturnip.warwickbrowser.ui.ModuleViewActivity.MODULE_NAME;
 
-public class ModuleAddLinkActivity extends AppCompatActivity implements AddModuleLinkDialogFragment.AddModuleLinkListener {
+public class ModuleAddLinkActivity extends WebViewActivity implements AddModuleLinkDialogFragment.AddModuleLinkListener {
     public static final String MODULE_ID = "module-id";
 
     private long moduleId;
-    private WebView webView;
     private String moduleName;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (!super.onCreateOptionsMenu(menu))
+            return false;
+        getMenuInflater().inflate(R.menu.add_module_link_menu, menu);
+
+        return true;
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -42,20 +49,8 @@ public class ModuleAddLinkActivity extends AppCompatActivity implements AddModul
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.options, menu);
-
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Statics.cookieSetup();
-
-        setContentView(R.layout.activity_module_web_view);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         if (getIntent().getExtras() == null) {
             Log.e("turnipwarwick", "ModuleAddLinkActivity created without extras");
@@ -68,26 +63,15 @@ public class ModuleAddLinkActivity extends AppCompatActivity implements AddModul
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle("Adding link for " + moduleName);
         }
 
-        webView = findViewById(R.id.web_view);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         webView.setDownloadListener(new DownloadListener() {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
                 Snackbar.make(webView, "Can't download files in this mode.", Snackbar.LENGTH_SHORT).show();
             }
         });
-        // Required so it doesn't try to open stuff in Chrome
-        webView.setWebViewClient(new WebViewClient(){});
-        if (Build.VERSION.SDK_INT >= 21) {
-            // Third party cookies are needed for Warwick
-            CookieManager cookieManager = CookieManager.getInstance();
-            cookieManager.setAcceptThirdPartyCookies(webView, true);
-        }
         webView.loadUrl("https://search.warwick.ac.uk/website?q="+moduleName);
     }
 
