@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Warwick Browser</string>
+    <string name="title_activity_module_web_view">ModuleWebView</string>
+</resources>
