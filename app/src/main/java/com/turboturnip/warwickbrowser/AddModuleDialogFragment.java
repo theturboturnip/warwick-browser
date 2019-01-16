@@ -47,12 +47,8 @@ public class AddModuleDialogFragment extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialogInterface, int which) {}
         });
-        //builder.setView(R.layout.add_module_dialog);
         View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.add_module_dialog, null);
         final EditText dialogText = dialogView.findViewById(R.id.module_name);
-        /*dialogText.setFilters(new InputFilter[]{
-                new ModuleNameInputFilter()
-        });*/
         dialogText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -61,7 +57,7 @@ public class AddModuleDialogFragment extends DialogFragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                Matcher m = ModuleNameInputFilter.moduleNamePattern.matcher(s.toString());
+                Matcher m = Statics.MODULE_NAME_PATTERN.matcher(s.toString());
                 if (!m.matches())
                     dialogText.setError("Must be of the form AA000");
             }

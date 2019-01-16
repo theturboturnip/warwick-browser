@@ -14,8 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
-import java.util.regex.Matcher;
-
 public class AddModuleLinkDialogFragment extends DialogFragment {
     public interface AddModuleLinkListener {
         String getLinkTarget();

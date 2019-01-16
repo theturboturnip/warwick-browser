@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:ems="10"
+        android:hint="Module Name (e.g. CS126, ES193)"
         android:inputType="textNoSuggestions"
-        android:singleLine="true"
-        android:text="Module Name" />
+        android:singleLine="true" />
 </LinearLayout>
