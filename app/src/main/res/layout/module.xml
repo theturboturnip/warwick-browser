@@ -21,22 +21,22 @@
             android:textAppearance="@android:style/TextAppearance.Material.Title"
             tools:text="CS141" />
 
-        <ImageView
+        <!--<ImageView
             android:id="@+id/settings_button"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:adjustViewBounds="true"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:tint="@color/fadedIcon"
             app:layout_constraintBottom_toBottomOf="@+id/title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@android:drawable/btn_dialog" />
+            app:srcCompat="@drawable/ic_settings_black_24dp" />-->
 
         <View
             android:id="@+id/divider"
             android:layout_width="wrap_content"
             android:layout_height="1dp"
-            android:background="?android:attr/listDivider"
             app:layout_constraintTop_toBottomOf="@+id/title" />
+        <!--android:background="?android:attr/listDivider"-->
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/links"
@@ -59,7 +59,7 @@
             app:layout_constraintHeight_min="20dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/links"
-            tools:listitem="@layout/module_file_item" />
+            tools:listitem="@layout/module_file_item"/>
 
         <ImageView
             android:id="@+id/open_files_button"
@@ -67,10 +67,11 @@
             android:layout_height="24dp"
             android:layout_weight="1"
             android:adjustViewBounds="true"
-            android:background="@android:color/holo_red_dark"
+            android:rotation="180"
+            android:tint="@color/fadedIcon"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/links"
-            app:srcCompat="@android:drawable/arrow_down_float" />
+            app:srcCompat="@drawable/ic_expand_less_black_24dp" />
 
     </android.support.constraint.ConstraintLayout>
 

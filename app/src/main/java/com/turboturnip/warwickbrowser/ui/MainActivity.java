@@ -83,7 +83,17 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         moduleAdapter = new ModuleViewAdapter();
         moduleDatabase.daoModules().getModules().observe(this, moduleAdapter.moduleObserver);
 
-        moduleLayout = new LinearLayoutManager(this);
+        moduleLayout = new LinearLayoutManager(this) {
+            @Override
+            public boolean canScrollHorizontally() {
+                return false;
+            }
+
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
         moduleLayout.setOrientation(LinearLayoutManager.VERTICAL);
 
         moduleHolder = findViewById(R.id.modules);
