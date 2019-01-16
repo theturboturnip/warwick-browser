@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Warwick Browser</string>
     <string name="title_activity_module_web_view">ModuleWebView</string>
+    <string name="add_module_button_text">Add Module</string>
+    <string name="my_warwick_button">My Warwick</string>
+    <string name="write_ext_storage_request">This app requires the Write External Storage permission to download files.</string>
+    <string name="give_permission">Give Permission</string>
+    <string name="module_name_suggestion">Module Name (e.g. CS126, ES193)</string>
 </resources>
