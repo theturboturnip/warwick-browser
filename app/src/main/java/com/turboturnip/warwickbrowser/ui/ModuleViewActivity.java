@@ -13,6 +13,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
+import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -69,30 +70,41 @@ public class ModuleViewActivity extends WebViewActivity implements RedownloadFil
         webView.setDownloadListener(new DownloadListener() {
             @Override
             public void onDownloadStart(final String url, final String userAgent, final String contentDisposition, final String mimetype, final long contentLength) {
-                Uri requestURI = Uri.parse(url);
-                CookieManager cookieManager = CookieManager.getInstance();
-                String cookie = cookieManager.getCookie(url);
-                URI destinationJDKUri = new File(Statics.getStorageDirForModule(moduleName), requestURI.getLastPathSegment()).toURI();
-                Uri destinationUri = Uri.parse(destinationJDKUri.toString());
-                String baseName = requestURI.getLastPathSegment();
+                final Uri requestURI = Uri.parse(url);
+                final String cookie = CookieManager.getInstance().getCookie(url);
 
-                Log.e("turnipwarwick", "Requested URI: " + requestURI);
-                Log.e("turnipwarwick", "Cookies: " + cookie);
-                Log.e("turnipwarwick", "Downloading to " + destinationUri);
+                getFolderName(new ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String subdirectory) {
+                        File storageDir = Statics.getStorageDirForModule(moduleName);
+                        if (subdirectory != null && !subdirectory.isEmpty()) {
+                            storageDir = new File(storageDir, subdirectory);
+                            if (!storageDir.isDirectory())
+                                storageDir.mkdirs();
+                        }
+                        URI destinationJDKUri = new File(storageDir, requestURI.getLastPathSegment()).toURI();
+                        Uri destinationUri = Uri.parse(destinationJDKUri.toString());
+                        String baseName = requestURI.getLastPathSegment();
 
-                DownloadManager.Request request = new DownloadManager.Request(requestURI)
-                        .addRequestHeader("Cookie", cookie)
-                        .setMimeType(mimetype)
-                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                        .setDestinationUri(destinationUri)
-                        .setTitle(baseName)
-                        .setDescription("Downloading File")
-                        .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE | DownloadManager.Request.NETWORK_WIFI)
-                        .setAllowedOverMetered(true)
-                        .setAllowedOverRoaming(true)
-                        .setVisibleInDownloadsUi(true);
+                        Log.e("turnipwarwick", "Requested URI: " + requestURI);
+                        Log.e("turnipwarwick", "Cookies: " + cookie);
+                        Log.e("turnipwarwick", "Downloading to " + destinationUri);
 
-                tryDownload(new DownloadRequest(request, destinationUri));
+                        DownloadManager.Request request = new DownloadManager.Request(requestURI)
+                                .addRequestHeader("Cookie", cookie)
+                                .setMimeType(mimetype)
+                                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                                .setDestinationUri(destinationUri)
+                                .setTitle(baseName)
+                                .setDescription("Downloading File")
+                                .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE | DownloadManager.Request.NETWORK_WIFI)
+                                .setAllowedOverMetered(true)
+                                .setAllowedOverRoaming(true)
+                                .setVisibleInDownloadsUi(true);
+
+                        tryDownload(new DownloadRequest(request, destinationUri));
+                    }
+                });
             }
         });
         webView.loadUrl(targetUrl.toString());
@@ -123,5 +135,26 @@ public class ModuleViewActivity extends WebViewActivity implements RedownloadFil
     private void honorDownloadRequest(DownloadRequest request) {
         downloadManager.enqueue(request.request);
         Snackbar.make(webView, "Downloading " + request.destinationUri.getLastPathSegment(), Snackbar.LENGTH_LONG).show();
+    }
+
+    private void getFolderName(ValueCallback<String> callback) {
+        Uri currentUri = Uri.parse(webView.getUrl());
+        Log.e("turnipwarwick", currentUri.toString());
+        if (currentUri.getHost().equals("moodle.warwick.ac.uk")
+                && currentUri.getPath().startsWith("/mod/folder/view.php")) {
+            Log.e("turnipwarwick", "Fits folder definition");
+            extractMoodleFolderName(callback);
+        } else
+            callback.onReceiveValue("");
+    }
+    private static final String MOODLE_EXTRACT_FOLDER_JS = "document.querySelector(\"[role=navigation] > .breadcrumb > .breadcrumb-item > a[title=Folder]\").childNodes[0].data";
+    private void extractMoodleFolderName(ValueCallback<String> callback) {
+        webView.evaluateJavascript(MOODLE_EXTRACT_FOLDER_JS, new ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String value) {
+                // Trim quote marks off the ends
+                callback.onReceiveValue(value.substring(1, value.length() - 1));
+            }
+        });
     }
 }
