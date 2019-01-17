@@ -14,6 +14,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.Toolbar;
 import android.transition.AutoTransition;
 import android.transition.Transition;
 import android.support.v4.app.ActivityCompat;
@@ -25,6 +26,7 @@ import android.support.v7.widget.RecyclerView;
 import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
@@ -186,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
     }
 
     private class ModuleView extends RecyclerView.ViewHolder {
-        private TextView titleView;
+        private Toolbar toolbar;
 
         private RecyclerView linksHolder;
         private ModuleLinksAdapter linksAdapter;
@@ -205,7 +207,8 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             super(itemView);
             layout = itemView.findViewById(R.id.module_layout);
 
-            titleView = itemView.findViewById(R.id.title);
+            toolbar = itemView.findViewById(R.id.toolbar);
+            toolbar.inflateMenu(R.menu.module_context_menu);
 
             linksAdapter = new ModuleLinksAdapter();
             linksLayout = new LinearLayoutManager(itemView.getContext());
@@ -244,7 +247,21 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         }
 
         void updateContents(ModuleAndLinks data) {
-            titleView.setText(data.module.title);
+            toolbar.setTitle(data.module.title);
+            toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    if (menuItem.getItemId() == R.id.action_add_link) {
+                        Intent intent = new Intent(MainActivity.this, ModuleAddLinkActivity.class);
+                        intent.putExtra(MODULE_ID, data.module.id);
+                        intent.putExtra(ModuleViewActivity.MODULE_NAME, data.module.title);
+                        MainActivity.this.startActivityForResult(intent, 0);
+
+                    }
+                    return false;
+                }
+            });
+
             linksAdapter.moduleData = data;
             linksAdapter.data = data.links;
             linksAdapter.notifyDataSetChanged();
@@ -286,18 +303,6 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
                     intent.putExtra(ModuleViewActivity.MODULE_NAME, moduleData.module.title);
                     intent.putExtra(ModuleViewActivity.REQUESTED_PATH, link.target);
                     v.getContext().startActivity(intent);
-                }
-            });
-        }
-        void setToAddLink(final ModuleAndLinks moduleData) {
-            linkButton.setText("+");
-            linkButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(v.getContext(), ModuleAddLinkActivity.class);
-                    intent.putExtra(MODULE_ID, moduleData.module.id);
-                    intent.putExtra(ModuleViewActivity.MODULE_NAME, moduleData.module.title);
-                    MainActivity.this.startActivityForResult(intent, 0);
                 }
             });
         }
@@ -478,7 +483,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
 
         @Override
         public void onBindViewHolder(@NonNull ModuleFileView moduleFileView, int i) {
-            if (files != null) {
+            if (files != null && !files.isEmpty()) {
                 File fileForView = files.get(i);
                 if (fileForView.isDirectory())
                     moduleFileView.setDirectory(fileForView, i == 0);
@@ -490,7 +495,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
 
         @Override
         public int getItemCount() {
-            if (files != null)
+            if (files != null && !files.isEmpty())
                 return files.size();
             return 1;
         }
@@ -508,15 +513,12 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
 
         @Override
         public void onBindViewHolder(@NonNull ModuleLinkView moduleLinkView, int idx) {
-            if (idx == data.size())
-                moduleLinkView.setToAddLink(moduleData);
-            else
-                moduleLinkView.setLink(moduleData, data.get(idx));
+            moduleLinkView.setLink(moduleData, data.get(idx));
         }
 
         @Override
         public int getItemCount() {
-            return data.size() + 1;
+            return data.size();
         }
     }
 

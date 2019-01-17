@@ -11,15 +11,14 @@
         android:id="@+id/module_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_marginBottom="8dp"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@android:style/TextAppearance.Material.Title"
-            tools:text="CS141" />
+            tools:title="CS141" />
 
         <!--<ImageView
             android:id="@+id/settings_button"
@@ -31,27 +30,29 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_settings_black_24dp" />-->
 
-        <View
+        <!--<View
             android:id="@+id/divider"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="1dp"
-            app:layout_constraintTop_toBottomOf="@+id/title" />
+            app:layout_constraintTop_toBottomOf="@+id/title" />-->
         <!--android:background="?android:attr/listDivider"-->
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/links"
             android:layout_width="0dp"
             android:layout_height="48dp"
+            android:layout_marginStart="8dp"
             android:scrollbars="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"
             tools:listitem="@layout/module_link_item" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/files"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:scrollbars="vertical"
             app:layout_constrainedHeight="true"
             app:layout_constraintEnd_toStartOf="@+id/open_files_button"
@@ -59,12 +60,13 @@
             app:layout_constraintHeight_min="20dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/links"
-            tools:listitem="@layout/module_file_item"/>
+            tools:listitem="@layout/module_file_item" />
 
         <ImageView
             android:id="@+id/open_files_button"
             android:layout_width="24dp"
             android:layout_height="24dp"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:adjustViewBounds="true"
             android:rotation="180"
