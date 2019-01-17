@@ -12,11 +12,28 @@
         android:layout_height="1dp"
         android:background="?android:attr/listDivider" />
 
-    <TextView
-        android:id="@+id/file_name"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_vertical"
-        tools:text="abcdefghijklmnopqrstuvwxyz" />
+        android:gravity="left|center_vertical"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/indent"
+            android:layout_width="16dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginEnd="4dp "
+            android:background="#00ffffff"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/file_name"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            tools:text="abcdefghijklmnopqrstuvwxyz" />
+    </LinearLayout>
 
 </LinearLayout>

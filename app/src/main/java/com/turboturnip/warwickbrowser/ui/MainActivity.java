@@ -46,7 +46,14 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
 import static com.turboturnip.warwickbrowser.ui.ModuleAddLinkActivity.MODULE_ID;
 
@@ -298,20 +305,30 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
     private class ModuleFileView extends RecyclerView.ViewHolder {
         private TextView textView;
         private View dividerView;
+        private View indentView;
 
         ModuleFileView(@NonNull View itemView) {
             super(itemView);
             textView = itemView.findViewById(R.id.file_name);
             dividerView = itemView.findViewById(R.id.divider);
+            indentView = itemView.findViewById(R.id.indent);
         }
-        void setFile(File file, boolean isFirst) {
+        void setDirectory(File directory, boolean isFirst) {
+            textView.setText(directory.getName());
+            textView.setOnClickListener(null);
+            dividerView.setVisibility(isFirst ? View.GONE : View.VISIBLE);
+            indentView.setVisibility(View.GONE);
+        }
+        void setFile(File file, boolean isFirst, boolean indented) {
             textView.setText(file.getName());
 
             Uri fileURI = FileProvider.getUriForFile(MainActivity.this, "com.turboturnip.warwickbrowser.fileprovider", file);
 
             String mimetype = null;
-            String extension = MimeTypeMap.getFileExtensionFromUrl(file.getAbsolutePath());
+            //String possibleExtensions = file.getName().substring(file.getName().indexOf('.'));
+            String extension = MimeTypeMap.getFileExtensionFromUrl(fileURI.toString());
             if (extension != null) {
+                Log.e("turnipwarwick", "Found ext " + extension + " for " + file.getName());
                 mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
             }
 
@@ -323,6 +340,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             } else {
                 fileIntent.setData(fileURI);
             }
+            Log.e("turnipwarwick", "Selected mimetype " + mimetype + " for " + file.getName());
             final Intent openFileIntent = mimetype == null ? (Intent.createChooser(fileIntent, "Open " + file.getName() + " with")) : fileIntent;
 
             textView.setOnClickListener(new View.OnClickListener() {
@@ -333,6 +351,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             });
 
             dividerView.setVisibility(isFirst ? View.GONE : View.VISIBLE);
+            indentView.setVisibility(indented ? View.VISIBLE : View.GONE);
         }
         void setNoFile() {
             textView.setText("No Files");
@@ -362,10 +381,32 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
     private class ModuleFilesAdapter extends RecyclerView.Adapter<ModuleFileView> {
         private class ModuleDirectoryObserver extends FileObserver {
             final String directoryPath;
-            ModuleDirectoryObserver(String directoryPath) {
+            final Map<String, ModuleDirectoryObserver> childObservers;
+            final boolean watchSubdirectories;
+            ModuleDirectoryObserver(String directoryPath, boolean watchSubdirectories) {
                 super(directoryPath);
                 this.directoryPath = directoryPath;
+                this.childObservers = new HashMap<>();
+                this.watchSubdirectories = watchSubdirectories;
+                updateSubdirectories();
                 startWatching();
+            }
+
+            private synchronized void updateSubdirectories() {
+                if (!watchSubdirectories) return;
+
+                File currentFile = new File(directoryPath);
+                Set<String> toRemove = new HashSet<>(childObservers.keySet());
+                for (File subdirectory : currentFile.listFiles(File::isDirectory)) {
+                    String subdirName = subdirectory.getName();
+
+                    toRemove.remove(subdirName);
+                    ModuleDirectoryObserver currentObserver = childObservers.get(subdirName);
+                    if (currentObserver == null)
+                        childObservers.put(subdirName, new ModuleDirectoryObserver(subdirectory.getPath(), false));
+                }
+                for (String nonexistantDir : toRemove)
+                    childObservers.remove(nonexistantDir);
             }
 
             @Override
@@ -375,20 +416,37 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
                     case MOVED_TO:
                     case CREATE:
                     case DELETE:
+                        updateSubdirectories();
                         updateFiles();
+                        break;
                     case MOVE_SELF:
                     case DELETE_SELF:
                         stopWatching();
+                        break;
                 }
             }
         }
         private ModuleDirectoryObserver directoryObserver;
         private List<File> pendingFiles;
         private List<File> files;
+        private final Comparator<File> fileComparator = (f1, f2) -> (int)(f2.lastModified() - f1.lastModified());
+
         private void updateFiles(){
             File directory = new File(directoryObserver.directoryPath);
-            pendingFiles = Arrays.asList(directory.listFiles());
-            Collections.sort(pendingFiles, (f1, f2) -> (int)(f2.lastModified() - f1.lastModified()));
+
+            List<File> directChildren = Arrays.asList(directory.listFiles());
+            Collections.sort(directChildren, fileComparator);
+            pendingFiles = new ArrayList<>(directChildren.size());
+
+            for (File file : directChildren) {
+                pendingFiles.add(file);
+                if (file.isDirectory()) {
+                    File[] childFiles = file.listFiles(File::isFile);
+                    List<File> childFileList = Arrays.asList(childFiles);
+                    Collections.sort(childFileList, fileComparator);
+                    pendingFiles.addAll(childFileList);
+                }
+            }
 
             handler.sendEmptyMessage(0);
         }
@@ -408,7 +466,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         void setDirectory(String path) {
             if (directoryObserver != null)
                 directoryObserver.stopWatching();
-            directoryObserver = new ModuleDirectoryObserver(path);
+            directoryObserver = new ModuleDirectoryObserver(path, true);
             updateFiles();
         }
 
@@ -420,9 +478,13 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
 
         @Override
         public void onBindViewHolder(@NonNull ModuleFileView moduleFileView, int i) {
-            if (files != null)
-                moduleFileView.setFile(files.get(i), i == 0);
-            else
+            if (files != null) {
+                File fileForView = files.get(i);
+                if (fileForView.isDirectory())
+                    moduleFileView.setDirectory(fileForView, i == 0);
+                else
+                    moduleFileView.setFile(fileForView, i == 0, !fileForView.getParent().equals(directoryObserver.directoryPath));
+            } else
                 moduleFileView.setNoFile();
         }
 
