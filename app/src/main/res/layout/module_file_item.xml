@@ -2,19 +2,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="24dp"
+    android:gravity="center_vertical"
     android:orientation="vertical">
-
-    <TextView
-        android:id="@+id/file_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="4dp"
-        tools:text="Filename" />
 
     <View
         android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="?android:attr/listDivider" />
+
+    <TextView
+        android:id="@+id/file_name"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        tools:text="abcdefghijklmnopqrstuvwxyz" />
+
 </LinearLayout>

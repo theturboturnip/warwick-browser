@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v4.content.FileProvider;
+import android.support.v7.widget.DividerItemDecoration;
 import android.transition.AutoTransition;
 import android.transition.Transition;
 import android.support.v4.app.ActivityCompat;
@@ -219,8 +220,9 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             filesOpen.clone(layout);
             filesClosed = new ConstraintSet();
             filesClosed.clone(filesOpen);
-            filesClosed.constrainMaxHeight(R.id.files, 20);
-            filesClosed.setRotation(R.id.open_files_button, 90);
+            filesClosed.constrainMaxHeight(R.id.files, 24);
+            filesOpen.setRotation(R.id.open_files_button, 0);
+            filesClosed.setRotation(R.id.open_files_button, 180);
 
             ImageView openFilesButton = itemView.findViewById(R.id.open_files_button);
             openFilesButton.setOnClickListener(new View.OnClickListener() {
@@ -295,11 +297,14 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
     }
     private class ModuleFileView extends RecyclerView.ViewHolder {
         private TextView textView;
+        private View dividerView;
+
         ModuleFileView(@NonNull View itemView) {
             super(itemView);
             textView = itemView.findViewById(R.id.file_name);
+            dividerView = itemView.findViewById(R.id.divider);
         }
-        void setFile(File file) {
+        void setFile(File file, boolean isFirst) {
             textView.setText(file.getName());
 
             Uri fileURI = FileProvider.getUriForFile(MainActivity.this, "com.turboturnip.warwickbrowser.fileprovider", file);
@@ -326,6 +331,8 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
                     startActivity(openFileIntent);
                 }
             });
+
+            dividerView.setVisibility(isFirst ? View.GONE : View.VISIBLE);
         }
         void setNoFile() {
             textView.setText("No Files");
@@ -414,7 +421,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         @Override
         public void onBindViewHolder(@NonNull ModuleFileView moduleFileView, int i) {
             if (files != null)
-                moduleFileView.setFile(files.get(i));
+                moduleFileView.setFile(files.get(i), i == 0);
             else
                 moduleFileView.setNoFile();
         }
