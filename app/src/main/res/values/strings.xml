@@ -12,4 +12,5 @@
     <string name="link_target_title">Link Target</string>
     <string name="link_name_hint">Name</string>
     <string name="link_target_hint">Link</string>
+    <string name="add_module">Add Module</string>
 </resources>

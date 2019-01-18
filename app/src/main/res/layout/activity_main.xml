@@ -6,34 +6,15 @@
     android:layout_height="match_parent"
     tools:context=".ui.MainActivity">
 
-    <android.support.v4.widget.NestedScrollView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/modules"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_buttons"
-        app:layout_constraintTop_toTopOf="parent"
-        android:overScrollMode="never">
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical"
+        android:padding="8dp"
+        android:nestedScrollingEnabled="false"
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="8dp">
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/modules"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="none"
-
-                tools:listitem="@layout/module" />
-
-            <Button
-                android:id="@+id/add_module_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/add_module_button_text" />
-        </LinearLayout>
-    </android.support.v4.widget.NestedScrollView>
+        tools:listitem="@layout/module" />
 
     <LinearLayout
         android:id="@+id/bottom_buttons"

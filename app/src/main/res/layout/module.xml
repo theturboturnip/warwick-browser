@@ -3,78 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="240dp"
     android:layout_marginBottom="8dp"
     android:padding="8dp">
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/module_layout"
+
+    <include
+        layout="@layout/module_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:orientation="vertical">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:title="CS141" />
-
-        <!--<ImageView
-            android:id="@+id/settings_button"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:tint="@color/fadedIcon"
-            app:layout_constraintBottom_toBottomOf="@+id/title"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_settings_black_24dp" />-->
-
-        <!--<View
-            android:id="@+id/divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            app:layout_constraintTop_toBottomOf="@+id/title" />-->
-        <!--android:background="?android:attr/listDivider"-->
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/links"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="8dp"
-            android:scrollbars="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar"
-            tools:listitem="@layout/module_link_item" />
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/files"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:scrollbars="vertical"
-            app:layout_constrainedHeight="true"
-            app:layout_constraintEnd_toStartOf="@+id/open_files_button"
-            app:layout_constraintHeight_max="200dp"
-            app:layout_constraintHeight_min="20dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/links"
-            tools:listitem="@layout/module_file_item" />
-
-        <ImageView
-            android:id="@+id/open_files_button"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="8dp"
-            android:layout_weight="1"
-            android:adjustViewBounds="true"
-            android:rotation="180"
-            android:tint="@color/fadedIcon"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/links"
-            app:srcCompat="@drawable/ic_expand_less_black_24dp" />
-
-    </android.support.constraint.ConstraintLayout>
-
+        android:layout_height="match_parent" />
 </android.support.v7.widget.CardView>

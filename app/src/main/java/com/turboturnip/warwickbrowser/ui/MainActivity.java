@@ -26,6 +26,7 @@ import android.support.v7.widget.RecyclerView;
 import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,14 +78,6 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        findViewById(R.id.add_module_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AddModuleDialogFragment newFragment = new AddModuleDialogFragment();
-                newFragment.show(getSupportFragmentManager(), "addModule");
-            }
-        });
-
         moduleDatabase = ModuleDatabase.getDatabase(this);
 
         permissionsDialog = findViewById(R.id.permission_dialog);
@@ -94,17 +87,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         moduleAdapter = new ModuleViewAdapter();
         moduleDatabase.daoModules().getModules().observe(this, moduleAdapter.moduleObserver);
 
-        moduleLayout = new LinearLayoutManager(this) {
-            @Override
-            public boolean canScrollHorizontally() {
-                return false;
-            }
-
-            @Override
-            public boolean canScrollVertically() {
-                return false;
-            }
-        };
+        moduleLayout = new LinearLayoutManager(this);
         moduleLayout.setOrientation(LinearLayoutManager.VERTICAL);
 
         moduleHolder = findViewById(R.id.modules);
@@ -170,6 +153,22 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_add_module) {
+            AddModuleDialogFragment newFragment = new AddModuleDialogFragment();
+            newFragment.show(getSupportFragmentManager(), "addModule");
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onModuleAdded(final String title) {
         new AsyncDBModuleCreate(moduleDatabase, title).execute();
     }
@@ -212,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
 
             linksAdapter = new ModuleLinksAdapter();
             linksLayout = new LinearLayoutManager(itemView.getContext());
-            linksLayout.setOrientation(LinearLayoutManager.HORIZONTAL);
+            linksLayout.setOrientation(LinearLayoutManager.VERTICAL);
             linksHolder = itemView.findViewById(R.id.links);
             linksHolder.setRecycledViewPool(moduleLinkPool);
             linksHolder.setAdapter(linksAdapter);
@@ -226,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             filesHolder.setAdapter(filesAdapter);
             filesHolder.setLayoutManager(filesLayout);
 
-            filesOpen = new ConstraintSet();
+            /*filesOpen = new ConstraintSet();
             filesOpen.clone(layout);
             filesClosed = new ConstraintSet();
             filesClosed.clone(filesOpen);
@@ -243,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
                     else
                         closeFiles();
                 }
-            });
+            });*/
         }
 
         void updateContents(ModuleAndLinks data) {
@@ -267,9 +266,9 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             linksAdapter.notifyDataSetChanged();
             filesAdapter.setDirectory(Statics.getStorageDirForModule(data.module.title).getAbsolutePath());
 
-            closeFiles();
+            //closeFiles();
         }
-        private void closeFiles(){
+        /*private void closeFiles(){
             if (closed) return;
             Transition transition = new AutoTransition();
             //transition.setDuration(1000);
@@ -286,7 +285,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             filesOpen.applyTo(layout);
             filesHolder.setVerticalScrollBarEnabled(true);
             closed = false;
-        }
+        }*/
     }
     private class ModuleLinkView extends RecyclerView.ViewHolder {
         private Button linkButton;
