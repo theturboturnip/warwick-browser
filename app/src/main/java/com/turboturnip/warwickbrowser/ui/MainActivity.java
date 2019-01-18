@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
 
             linksAdapter = new ModuleLinksAdapter();
             linksLayout = new LinearLayoutManager(itemView.getContext());
-            linksLayout.setOrientation(LinearLayoutManager.VERTICAL);
+            linksLayout.setOrientation(RecyclerView.VERTICAL);
             linksHolder = itemView.findViewById(R.id.links);
             linksHolder.setRecycledViewPool(moduleLinkPool);
             linksHolder.setAdapter(linksAdapter);
@@ -213,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
 
             filesAdapter = new ModuleFilesAdapter();
             filesLayout = new LinearLayoutManager(itemView.getContext());
-            filesLayout.setOrientation(LinearLayoutManager.VERTICAL);
+            filesLayout.setOrientation(RecyclerView.VERTICAL);
             filesHolder = itemView.findViewById(R.id.files);
             filesHolder.setRecycledViewPool(moduleFilePool);
             filesHolder.setAdapter(filesAdapter);
@@ -353,6 +353,8 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         }
         void setNoFile() {
             textView.setText("No Files");
+            dividerView.setVisibility(View.GONE);
+            indentView.setVisibility(View.GONE);
             textView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {}
