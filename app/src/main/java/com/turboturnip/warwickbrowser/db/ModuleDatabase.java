@@ -1,11 +1,11 @@
 package com.turboturnip.warwickbrowser.db;
 
-import android.arch.persistence.room.Database;
-import android.arch.persistence.room.Room;
-import android.arch.persistence.room.RoomDatabase;
+import androidx.room.Database;
+import androidx.room.Room;
+import androidx.room.RoomDatabase;
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 @Database(entities = {Module.class, ModuleLink.class}, version = 1, exportSchema = false)
 public abstract class ModuleDatabase extends RoomDatabase {
