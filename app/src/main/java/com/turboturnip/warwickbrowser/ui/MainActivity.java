@@ -2,9 +2,12 @@ package com.turboturnip.warwickbrowser.ui;
 
 import android.Manifest;
 import androidx.lifecycle.Observer;
+
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.FileObserver;
 import android.os.Handler;
 import android.os.Message;
@@ -32,6 +35,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.turboturnip.warwickbrowser.Statics;
+import com.turboturnip.warwickbrowser.db.Module;
 import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleCreate;
 import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleLinkInsert;
 import com.turboturnip.warwickbrowser.ui.dialog.AddModuleDialogFragment;
@@ -51,6 +55,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.turboturnip.warwickbrowser.ui.ModuleAddLinkActivity.MODULE_ID;
 
@@ -317,29 +322,10 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             dividerView.setVisibility(isFirst ? View.GONE : View.VISIBLE);
             indentView.setVisibility(View.GONE);
         }
-        void setFile(File file, boolean isFirst, boolean indented) {
-            textView.setText(file.getName());
+        void setFile(String fileName, final Intent openFileIntent, boolean isFirst, boolean indented) {
+            textView.setText(fileName);
 
-            Uri fileURI = FileProvider.getUriForFile(MainActivity.this, "com.turboturnip.warwickbrowser.fileprovider", file);
 
-            String mimetype = null;
-            //String possibleExtensions = file.getName().substring(file.getName().indexOf('.'));
-            String extension = MimeTypeMap.getFileExtensionFromUrl(fileURI.toString());
-            if (extension != null) {
-                Log.e("turnipwarwick", "Found ext " + extension + " for " + file.getName());
-                mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-            }
-
-            Intent fileIntent = new Intent(Intent.ACTION_VIEW);
-            fileIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            if (mimetype != null) {
-                fileIntent.setDataAndType(fileURI, mimetype);
-                fileIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
-            } else {
-                fileIntent.setData(fileURI);
-            }
-            Log.e("turnipwarwick", "Selected mimetype " + mimetype + " for " + file.getName());
-            final Intent openFileIntent = mimetype == null ? (Intent.createChooser(fileIntent, "Open " + file.getName() + " with")) : fileIntent;
 
             textView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -379,6 +365,40 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         }
     }
     private class ModuleFilesAdapter extends RecyclerView.Adapter<ModuleFileView> {
+        private class ModuleFile {
+            File file;
+            final Intent openFileIntent;
+
+            public ModuleFile(File file){
+                this.file = file;
+
+                if (file.isDirectory()) {
+                    openFileIntent = null;
+                    return;
+                }
+
+                Uri fileURI = FileProvider.getUriForFile(MainActivity.this, "com.turboturnip.warwickbrowser.fileprovider", file);
+
+                String mimetype = null;
+                //String possibleExtensions = file.getName().substring(file.getName().indexOf('.'));
+                String extension = MimeTypeMap.getFileExtensionFromUrl(fileURI.toString());
+                if (extension != null) {
+                    Log.e("turnipwarwick", "Found ext " + extension + " for " + file.getName());
+                    mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                }
+
+                Intent fileIntent = new Intent(Intent.ACTION_VIEW);
+                fileIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                if (mimetype != null) {
+                    fileIntent.setDataAndType(fileURI, mimetype);
+                    fileIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+                } else {
+                    fileIntent.setData(fileURI);
+                }
+                Log.e("turnipwarwick", "Selected mimetype " + mimetype + " for " + file.getName());
+                openFileIntent = mimetype == null ? (Intent.createChooser(fileIntent, "Open " + file.getName() + " with")) : fileIntent;
+            }
+        }
         private class ModuleDirectoryObserver extends FileObserver {
             final String directoryPath;
             final Map<String, ModuleDirectoryObserver> childObservers;
@@ -410,6 +430,14 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             }
 
             @Override
+            public void stopWatching() {
+                super.stopWatching();
+                for (ModuleDirectoryObserver childObserver : childObservers.values()) {
+                    childObserver.stopWatching();
+                }
+            }
+
+            @Override
             public void onEvent(int event, @Nullable String path) {
                 switch(event) {
                     case MOVED_FROM:
@@ -427,28 +455,40 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             }
         }
         private ModuleDirectoryObserver directoryObserver;
-        private List<File> pendingFiles;
-        private List<File> files;
-        private final Comparator<File> fileComparator = (f1, f2) -> (int)(f2.lastModified() - f1.lastModified());
+        private List<ModuleFile> pendingFiles;
+        private List<ModuleFile> files;
+        private final Comparator<File> fileComparator = (f1, f2) -> (int)(f2.lastModified()/1000000 - f1.lastModified()/1000000);
 
-        private void updateFiles(){
-            File directory = new File(directoryObserver.directoryPath);
+        private class UpdateFilesTask extends AsyncTask<Handler, Void, List<ModuleFile>> {
+            @Override
+            protected List<ModuleFile> doInBackground(Handler... handlers) {
+                File directory = new File(directoryObserver.directoryPath);
 
-            List<File> directChildren = Arrays.asList(directory.listFiles());
-            Collections.sort(directChildren, fileComparator);
-            pendingFiles = new ArrayList<>(directChildren.size());
+                List<File> directChildren = Arrays.asList(directory.listFiles());
+                Collections.sort(directChildren, fileComparator);
+                ArrayList<ModuleFile> pendingFiles = new ArrayList<>(directChildren.size());
 
-            for (File file : directChildren) {
-                pendingFiles.add(file);
-                if (file.isDirectory()) {
-                    File[] childFiles = file.listFiles(File::isFile);
-                    List<File> childFileList = Arrays.asList(childFiles);
-                    Collections.sort(childFileList, fileComparator);
-                    pendingFiles.addAll(childFileList);
+                for (File file : directChildren) {
+                    pendingFiles.add(new ModuleFile(file));
+                    if (file.isDirectory()) {
+                        File[] childFiles = file.listFiles(File::isFile);
+                        List<File> childFileList = Arrays.asList(childFiles);
+                        pendingFiles.addAll(childFileList.stream().sorted(fileComparator).map(ModuleFile::new).collect(Collectors.toList()));
+                    }
                 }
+
+                return pendingFiles;
             }
 
-            handler.sendEmptyMessage(0);
+            @Override
+            protected void onPostExecute(List<ModuleFile> files) {
+                ModuleFilesAdapter.this.pendingFiles = files;
+                handler.sendEmptyMessage(0);
+            }
+        }
+
+        private void updateFiles(){
+            new UpdateFilesTask().execute(handler);
         }
 
         private Handler handler;
@@ -458,7 +498,8 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         }
 
         @Override
-        protected void finalize() {
+        protected void finalize() throws Throwable {
+            super.finalize();
             if (directoryObserver != null)
                 directoryObserver.stopWatching();
         }
@@ -479,11 +520,11 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         @Override
         public void onBindViewHolder(@NonNull ModuleFileView moduleFileView, int i) {
             if (files != null && !files.isEmpty()) {
-                File fileForView = files.get(i);
-                if (fileForView.isDirectory())
-                    moduleFileView.setDirectory(fileForView, i == 0);
+                ModuleFile fileForView = files.get(i);
+                if (fileForView.file.isDirectory())
+                    moduleFileView.setDirectory(fileForView.file, i == 0);
                 else
-                    moduleFileView.setFile(fileForView, i == 0, !fileForView.getParent().equals(directoryObserver.directoryPath));
+                    moduleFileView.setFile(fileForView.file.getName(), fileForView.openFileIntent, i == 0, !fileForView.file.getParent().equals(directoryObserver.directoryPath));
             } else
                 moduleFileView.setNoFile();
         }
