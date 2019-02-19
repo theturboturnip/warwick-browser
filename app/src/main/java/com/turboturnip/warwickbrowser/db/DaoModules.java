@@ -20,6 +20,10 @@ public interface DaoModules {
     @Query("SELECT * FROM Module")
     LiveData<List<ModuleAndLinks>> getModules();
 
+    @Transaction
+    @Query("SELECT * FROM Module WHERE Module.id == :id")
+    ModuleAndLinks getModuleFromId(long id);
+
     @Delete
     void deleteModule(Module module);
 }

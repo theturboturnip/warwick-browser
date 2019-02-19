@@ -32,8 +32,12 @@
             android:id="@+id/file_name"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_marginRight="8dp"
+            android:ellipsize="end"
             android:gravity="center_vertical"
-            tools:text="abcdefghijklmnopqrstuvwxyz" />
+            android:lines="1"
+            android:singleLine="true"
+            tools:text="abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz" />
     </LinearLayout>
 
 </LinearLayout>
