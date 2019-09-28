@@ -24,6 +24,9 @@ public interface DaoModules {
     @Query("SELECT * FROM Module WHERE Module.id == :id")
     ModuleAndLinks getModuleFromId(long id);
 
+    @Query("DELETE FROM Module WHERE Module.id == :id")
+    void deleteModuleFromId(long id);
+
     @Delete
     void deleteModule(Module module);
 }

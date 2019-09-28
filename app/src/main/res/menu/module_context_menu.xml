@@ -4,4 +4,7 @@
     <item
         android:id="@+id/action_add_link"
         android:title="Add Link" />
+    <item
+        android:id="@+id/action_delete_module"
+        android:title="Delete Module" />
 </menu>

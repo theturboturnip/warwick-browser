@@ -13,4 +13,8 @@
     <string name="link_name_hint">Name</string>
     <string name="link_target_hint">Link</string>
     <string name="add_module">Add Module</string>
+
+    <string name="old_file_name">Original Name</string>
+    <string name="new_file_name">New Name</string>
+    <string name="new_name_target_hint">New Name</string>
 </resources>

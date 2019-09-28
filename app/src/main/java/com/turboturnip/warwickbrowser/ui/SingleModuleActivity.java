@@ -8,11 +8,13 @@ import com.turboturnip.warwickbrowser.R;
 import com.turboturnip.warwickbrowser.db.Module;
 import com.turboturnip.warwickbrowser.db.ModuleAndLinks;
 import com.turboturnip.warwickbrowser.db.ModuleDatabase;
+import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleDelete;
+import com.turboturnip.warwickbrowser.ui.dialog.DeleteModuleDialogFragment;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class SingleModuleActivity extends AppCompatActivity {
+public class SingleModuleActivity extends AppCompatActivity implements DeleteModuleDialogFragment.ShouldDeleteListener {
     ModuleView moduleView;
 
     public static final String ID_EXTRA = "id";
@@ -57,5 +59,11 @@ public class SingleModuleActivity extends AppCompatActivity {
             if (moduleAndLinks != null)
                 v.updateContents(moduleAndLinks);
         }
+    }
+
+    @Override
+    public void onDeleteRequestAccepted(long moduleID) {
+        new AsyncDBModuleDelete(ModuleDatabase.getDatabase(this), moduleID).execute();
+        finish();
     }
 }

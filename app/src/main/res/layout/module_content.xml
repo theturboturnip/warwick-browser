@@ -5,12 +5,15 @@
     android:id="@+id/module_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:elevation="24dp"
     android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        app:titleTextColor="#fff"
         tools:title="CS141" />
 
     <!--<ImageView
@@ -30,16 +33,27 @@
         app:layout_constraintTop_toBottomOf="@+id/title" />-->
     <!--android:background="?android:attr/listDivider"-->
 
+    <View
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/links"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        app:layout_constraintTop_toBottomOf="@+id/divider"
         tools:listitem="@layout/module_link_item" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -47,6 +61,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:nestedScrollingEnabled="true"
@@ -55,7 +70,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/links"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        app:layout_constraintTop_toBottomOf="@+id/divider"
         tools:listitem="@layout/module_file_item" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

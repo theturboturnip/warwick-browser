@@ -23,6 +23,7 @@ public class AsyncDBModuleCreate extends AsyncDBAction {
                 year = 4;
             moduleDatabase.daoModules().insertModuleLink(new ModuleLink(moduleId, "Home", "fac/sci/eng/eso/modules/year" + year + "/" + moduleName + "/"));
         }
+        moduleDatabase.daoModules().insertModuleLink(new ModuleLink(moduleId, "Exam Papers", "services/exampapers/?q=" + moduleName));
         return null;
     }
 }

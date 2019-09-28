@@ -42,8 +42,11 @@ public class AddModuleDialogFragment extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialogInterface, int which) {
                 EditText moduleName = dialog.findViewById(R.id.module_name);
-                if (moduleName.getError() == null)
-                    listener.onModuleAdded(moduleName.getText().toString());
+                if (moduleName.getError() == null) {
+                    Matcher m = Statics.MODULE_NAME_PATTERN.matcher(moduleName.getText().toString());
+                    if (m.matches())
+                        listener.onModuleAdded(moduleName.getText().toString());
+                }
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

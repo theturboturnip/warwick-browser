@@ -19,7 +19,11 @@ import android.widget.TextView;
 import com.turboturnip.warwickbrowser.R;
 import com.turboturnip.warwickbrowser.Statics;
 import com.turboturnip.warwickbrowser.db.ModuleAndLinks;
+import com.turboturnip.warwickbrowser.db.ModuleDatabase;
 import com.turboturnip.warwickbrowser.db.ModuleLink;
+import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleCreate;
+import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleDelete;
+import com.turboturnip.warwickbrowser.ui.dialog.DeleteModuleDialogFragment;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -60,6 +64,8 @@ public class ModuleView extends RecyclerView.ViewHolder {
 
     private ConstraintLayout layout;
     private ConstraintSet filesClosed, filesOpen;
+
+    private long moduleID;
 
     private boolean closed = false;
 
@@ -114,6 +120,7 @@ public class ModuleView extends RecyclerView.ViewHolder {
     }
 
     void updateContents(ModuleAndLinks data) {
+        moduleID = data.module.id;
         toolbar.setTitle(data.module.title);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -124,7 +131,20 @@ public class ModuleView extends RecyclerView.ViewHolder {
                     intent.putExtra(ModuleViewActivity.MODULE_NAME, data.module.title);
                     activity.get().startActivityForResult(intent, 0);
 
-                }
+                } else if (menuItem.getItemId() == R.id.action_delete_module) {
+                    DeleteModuleDialogFragment newFragment = DeleteModuleDialogFragment.newInstance(data.module);
+                    newFragment.show(activity.get().getSupportFragmentManager(), "shouldDelete");
+                } /*else if (menuItem.getItemId() == R.id.action_open_module_folder) {
+
+                    File folder = Statics.getStorageDirForModule(data.module.title);
+                    Uri folderUri2 = FileProvider.getUriForFile(activity.get(), "com.turboturnip.warwickbrowser.fileprovider", folder);
+                    Uri folderUri = Uri.parse(folder.getAbsolutePath());//folderUri;//.buildUpon().scheme("").build();
+                    Log.e("turnipwarwick", folderUri2.toString());
+                    Intent fileIntent = new Intent(Intent.ACTION_VIEW);
+                    fileIntent.setDataAndType(folderUri2, "resource/folder");
+                    fileIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);//Intent.FLAG_ACTIVITY_NEW_TASK);
+                    activity.get().startActivity(Intent.createChooser(fileIntent, "Open Folder"));
+                }*/
                 return false;
             }
         });
@@ -144,6 +164,7 @@ public class ModuleView extends RecyclerView.ViewHolder {
 
         //closeFiles();
     }
+
         /*private void closeFiles(){
             if (closed) return;
             Transition transition = new AutoTransition();
@@ -204,7 +225,7 @@ class ModuleFileView extends RecyclerView.ViewHolder {
 
 
 
-        textView.setOnClickListener(new View.OnClickListener() {
+        itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 v.getContext().startActivity(openFileIntent);
