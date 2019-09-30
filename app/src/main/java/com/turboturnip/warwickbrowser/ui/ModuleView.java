@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.turboturnip.warwickbrowser.R;
+import com.turboturnip.warwickbrowser.SortBy;
 import com.turboturnip.warwickbrowser.Statics;
 import com.turboturnip.warwickbrowser.db.ModuleAndLinks;
 import com.turboturnip.warwickbrowser.db.ModuleDatabase;
@@ -24,6 +25,8 @@ import com.turboturnip.warwickbrowser.db.ModuleLink;
 import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleCreate;
 import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleDelete;
 import com.turboturnip.warwickbrowser.ui.dialog.DeleteModuleDialogFragment;
+import com.turboturnip.warwickbrowser.ui.dialog.UpdateDescriptionDialogFragment;
+import com.turboturnip.warwickbrowser.ui.dialog.UpdateSortDialogFragment;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -36,6 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import androidx.annotation.NonNull;
@@ -122,29 +126,34 @@ public class ModuleView extends RecyclerView.ViewHolder {
     void updateContents(ModuleAndLinks data) {
         moduleID = data.module.id;
         toolbar.setTitle(data.module.title);
+        toolbar.setSubtitle(data.module.description);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                if (menuItem.getItemId() == R.id.action_add_link) {
-                    Intent intent = new Intent(activity.get(), ModuleAddLinkActivity.class);
-                    intent.putExtra(MODULE_ID, data.module.id);
-                    intent.putExtra(ModuleViewActivity.MODULE_NAME, data.module.title);
-                    activity.get().startActivityForResult(intent, 0);
-
-                } else if (menuItem.getItemId() == R.id.action_delete_module) {
-                    DeleteModuleDialogFragment newFragment = DeleteModuleDialogFragment.newInstance(data.module);
-                    newFragment.show(activity.get().getSupportFragmentManager(), "shouldDelete");
-                } /*else if (menuItem.getItemId() == R.id.action_open_module_folder) {
-
-                    File folder = Statics.getStorageDirForModule(data.module.title);
-                    Uri folderUri2 = FileProvider.getUriForFile(activity.get(), "com.turboturnip.warwickbrowser.fileprovider", folder);
-                    Uri folderUri = Uri.parse(folder.getAbsolutePath());//folderUri;//.buildUpon().scheme("").build();
-                    Log.e("turnipwarwick", folderUri2.toString());
-                    Intent fileIntent = new Intent(Intent.ACTION_VIEW);
-                    fileIntent.setDataAndType(folderUri2, "resource/folder");
-                    fileIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);//Intent.FLAG_ACTIVITY_NEW_TASK);
-                    activity.get().startActivity(Intent.createChooser(fileIntent, "Open Folder"));
-                }*/
+                switch (menuItem.getItemId()){
+                    case R.id.action_add_link: {
+                        Intent intent = new Intent(activity.get(), ModuleAddLinkActivity.class);
+                        intent.putExtra(MODULE_ID, data.module.id);
+                        intent.putExtra(ModuleViewActivity.MODULE_NAME, data.module.title);
+                        activity.get().startActivityForResult(intent, 0);
+                        break;
+                    }
+                    case R.id.action_delete_module: {
+                        DeleteModuleDialogFragment newFragment = DeleteModuleDialogFragment.newInstance(data.module);
+                        newFragment.show(activity.get().getSupportFragmentManager(), "shouldDelete");
+                        break;
+                    }
+                    case R.id.action_set_desc: {
+                        UpdateDescriptionDialogFragment newFragment = UpdateDescriptionDialogFragment.newInstance(data.module);
+                        newFragment.show(activity.get().getSupportFragmentManager(), "updateDesc");
+                        break;
+                    }
+                    case R.id.action_set_sort: {
+                        UpdateSortDialogFragment newFragment = UpdateSortDialogFragment.newInstance(data.module);
+                        newFragment.show(activity.get().getSupportFragmentManager(), "updateSort");
+                        break;
+                    }
+                }
                 return false;
             }
         });
@@ -160,6 +169,7 @@ public class ModuleView extends RecyclerView.ViewHolder {
         linksAdapter.moduleData = data;
         linksAdapter.data = data.links;
         linksAdapter.notifyDataSetChanged();
+        filesAdapter.setSortBy(data.module.sortBy);
         filesAdapter.setDirectory(Statics.getStorageDirForModule(data.module.title).getAbsolutePath());
 
         //closeFiles();
@@ -355,7 +365,9 @@ class ModuleFilesAdapter extends RecyclerView.Adapter<ModuleFileView> {
     ModuleDirectoryObserver directoryObserver;
     List<ModuleFile> pendingFiles;
     List<ModuleFile> files;
-    final Comparator<File> fileComparator = (f1, f2) -> (int)(f2.lastModified()/1000000 - f1.lastModified()/1000000);
+    // if f2.lastModified is < f1.lastModified, f2 comes first
+    // => earlier first => date ascending
+    private AtomicReference<Comparator<File>> fileComparatorRef = new AtomicReference<>();
 
     private class UpdateFilesTask extends AsyncTask<Handler, Void, List<ModuleFile>> {
         private WeakReference<Context> context;
@@ -366,6 +378,7 @@ class ModuleFilesAdapter extends RecyclerView.Adapter<ModuleFileView> {
         @Override
         protected List<ModuleFile> doInBackground(Handler... handlers) {
             File directory = new File(directoryObserver.directoryPath);
+            Comparator<File> fileComparator = fileComparatorRef.get();
 
             List<File> directChildren = Arrays.asList(directory.listFiles());
             Collections.sort(directChildren, fileComparator);
@@ -414,6 +427,10 @@ class ModuleFilesAdapter extends RecyclerView.Adapter<ModuleFileView> {
             directoryObserver.stopWatching();
         directoryObserver = new ModuleDirectoryObserver(path, true);
         updateFiles();
+    }
+
+    void setSortBy(SortBy sortBy) {
+        fileComparatorRef.set(sortBy.getComparator());
     }
 
     @NonNull

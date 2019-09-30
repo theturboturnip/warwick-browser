@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/action_set_sort"
+        android:icon="@drawable/ic_sort_white_24dp"
+        android:title="@string/sort_by"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_set_desc"
+        android:title="@string/set_description"
+        />
+    <item
         android:id="@+id/action_add_link"
-        android:title="Add Link" />
+        android:title="@string/add_link"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_delete_module"
-        android:title="Delete Module" />
+        android:title="@string/delete_module"
+        app:showAsAction="never" />
 </menu>

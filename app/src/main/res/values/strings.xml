@@ -17,4 +17,10 @@
     <string name="old_file_name">Original Name</string>
     <string name="new_file_name">New Name</string>
     <string name="new_name_target_hint">New Name</string>
+    <string name="set_description">Set Description</string>
+    <string name="add_link">Add Link</string>
+    <string name="delete_module">Delete Module</string>
+    <string name="sort_by">Sort By...</string>
+    <string name="new_description">New Description</string>
+    <string name="new_description_hint">New Description</string>
 </resources>

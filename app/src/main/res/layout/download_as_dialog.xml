@@ -21,7 +21,6 @@
         android:ems="10"
         android:hint="@string/link_name_hint"
         android:importantForAutofill="no"
-        android:inputType="textAutoCorrect|textAutoComplete"
         android:paddingStart="3dp"
         android:paddingTop="5dp"
         android:paddingBottom="3dp"

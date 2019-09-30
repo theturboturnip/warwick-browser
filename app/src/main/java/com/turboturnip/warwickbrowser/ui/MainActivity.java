@@ -34,17 +34,21 @@ import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.turboturnip.warwickbrowser.SortBy;
 import com.turboturnip.warwickbrowser.Statics;
 import com.turboturnip.warwickbrowser.db.Module;
 import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleCreate;
 import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleDelete;
 import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleLinkInsert;
+import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleUpdateDescription;
+import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleUpdateSortBy;
 import com.turboturnip.warwickbrowser.ui.dialog.AddModuleDialogFragment;
 import com.turboturnip.warwickbrowser.R;
 import com.turboturnip.warwickbrowser.db.ModuleAndLinks;
 import com.turboturnip.warwickbrowser.db.ModuleDatabase;
 import com.turboturnip.warwickbrowser.db.ModuleLink;
 import com.turboturnip.warwickbrowser.ui.dialog.DeleteModuleDialogFragment;
+import com.turboturnip.warwickbrowser.ui.dialog.ModuleDialogHandler;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -61,7 +65,7 @@ import java.util.stream.Collectors;
 
 import static com.turboturnip.warwickbrowser.ui.ModuleAddLinkActivity.MODULE_ID;
 
-public class MainActivity extends AppCompatActivity implements AddModuleDialogFragment.AddModuleListener, DeleteModuleDialogFragment.ShouldDeleteListener{
+public class MainActivity extends AppCompatActivity implements AddModuleDialogFragment.AddModuleListener, ModuleDialogHandler {
 
     private RecyclerView moduleHolder;
     private ModuleViewAdapter moduleAdapter;
@@ -192,4 +196,13 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         new AsyncDBModuleDelete(ModuleDatabase.getDatabase(this), moduleID).execute();
     }
 
+    @Override
+    public void onDescriptionUpdateRequested(long moduleId, String newDescription) {
+        new AsyncDBModuleUpdateDescription(ModuleDatabase.getDatabase(this), moduleId, newDescription).execute();
+    }
+
+    @Override
+    public void onSortUpdateRequested(long moduleId, SortBy newSort) {
+        new AsyncDBModuleUpdateSortBy(ModuleDatabase.getDatabase(this), moduleId, newSort).execute();
+    }
 }

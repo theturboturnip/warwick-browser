@@ -5,16 +5,20 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 import com.turboturnip.warwickbrowser.R;
+import com.turboturnip.warwickbrowser.SortBy;
 import com.turboturnip.warwickbrowser.db.Module;
 import com.turboturnip.warwickbrowser.db.ModuleAndLinks;
 import com.turboturnip.warwickbrowser.db.ModuleDatabase;
 import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleDelete;
+import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleUpdateDescription;
+import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleUpdateSortBy;
 import com.turboturnip.warwickbrowser.ui.dialog.DeleteModuleDialogFragment;
+import com.turboturnip.warwickbrowser.ui.dialog.ModuleDialogHandler;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class SingleModuleActivity extends AppCompatActivity implements DeleteModuleDialogFragment.ShouldDeleteListener {
+public class SingleModuleActivity extends AppCompatActivity implements ModuleDialogHandler {
     ModuleView moduleView;
 
     public static final String ID_EXTRA = "id";
@@ -40,6 +44,7 @@ public class SingleModuleActivity extends AppCompatActivity implements DeleteMod
         return super.onOptionsItemSelected(item);
     }
 
+
     private static class UpdateModuleTask extends AsyncTask<Long, Void, ModuleAndLinks> {
         private ModuleView v;
         private ModuleDatabase db;
@@ -64,6 +69,18 @@ public class SingleModuleActivity extends AppCompatActivity implements DeleteMod
     @Override
     public void onDeleteRequestAccepted(long moduleID) {
         new AsyncDBModuleDelete(ModuleDatabase.getDatabase(this), moduleID).execute();
+        finish();
+    }
+
+    @Override
+    public void onDescriptionUpdateRequested(long moduleId, String newDescription) {
+        new AsyncDBModuleUpdateDescription(ModuleDatabase.getDatabase(this), moduleId, newDescription).execute();
+        finish();
+    }
+
+    @Override
+    public void onSortUpdateRequested(long moduleId, SortBy newSort) {
+        new AsyncDBModuleUpdateSortBy(ModuleDatabase.getDatabase(this), moduleId, newSort).execute();
         finish();
     }
 }
