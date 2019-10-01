@@ -92,7 +92,7 @@ public enum SortBy {
                         if (comparison != 0)
                             return comparison;
                     }
-                    return 0;
+                    return tokens1.size() - tokens2.size();
                 }
 
                 class Token {
@@ -106,6 +106,12 @@ public enum SortBy {
                 }
 
                 List<Token> tokenize(String data) {
+                    // Strip extension
+                    int pos = data.lastIndexOf(".");
+                    if (pos > 0) {
+                        data = data.substring(0, pos);
+                    }
+
                     List<Token> tokens = new ArrayList<>();
                     Pattern name = Pattern.compile("[a-zA-Z]+");
                     Pattern number = Pattern.compile("[0-9]+");
