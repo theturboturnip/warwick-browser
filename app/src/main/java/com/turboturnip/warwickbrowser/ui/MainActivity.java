@@ -78,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
 
     private ModuleDatabase moduleDatabase;
 
+    private boolean waitingForPermission = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +91,11 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
         permissionsDialog.setVisibility(View.GONE);
         checkPermission();
 
+        if (!waitingForPermission)
+            setupLayout();
+    }
+
+    void setupLayout() {
         moduleAdapter = new ModuleViewAdapter(this, moduleLinkPool, moduleFilePool);
         moduleDatabase.daoModules().getModules().observe(this, moduleAdapter.moduleObserver);
 
@@ -138,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                         REQUEST_EXT_STORAGE);
             }
-
+            waitingForPermission = true;
         }
     }
     @Override
@@ -150,6 +157,10 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     permissionsDialog.setVisibility(View.GONE);
+                    if (waitingForPermission) {
+                        waitingForPermission = false;
+                        setupLayout();
+                    }
                 } else {
                     permissionsDialog.setVisibility(View.VISIBLE);
                 }
