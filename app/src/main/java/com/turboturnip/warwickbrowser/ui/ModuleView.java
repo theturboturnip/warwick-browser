@@ -291,7 +291,7 @@ class ModuleFilesAdapter extends RecyclerView.Adapter<ModuleFileView> {
             //String possibleExtensions = file.getName().substring(file.getName().indexOf('.'));
             String extension = MimeTypeMap.getFileExtensionFromUrl(fileURI.toString());
             if (extension != null) {
-                Log.e("turnipwarwick", "Found ext " + extension + " for " + file.getName());
+                Log.d("turnipwarwick", "Found ext " + extension + " for " + file.getName());
                 mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
             }
 
@@ -303,7 +303,7 @@ class ModuleFilesAdapter extends RecyclerView.Adapter<ModuleFileView> {
             } else {
                 fileIntent.setData(fileURI);
             }
-            Log.e("turnipwarwick", "Selected mimetype " + mimetype + " for " + file.getName());
+            Log.d("turnipwarwick", "Selected mimetype " + mimetype + " for " + file.getName());
             openFileIntent = mimetype == null ? (Intent.createChooser(fileIntent, "Open " + file.getName() + " with")) : fileIntent;
         }
     }

@@ -67,7 +67,7 @@ public class ModuleViewActivity extends WebViewActivity implements RedownloadFil
         }
 
         Uri targetUrl = Uri.parse(targetPath.startsWith("http") ? targetPath : "https://warwick.ac.uk/" + targetPath);
-        Log.e("turnipwarwick", "URI: " + targetUrl);
+        //Log.e("turnipwarwick", "URI: " + targetUrl);
 
         webView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -82,7 +82,7 @@ public class ModuleViewActivity extends WebViewActivity implements RedownloadFil
                 if (extension != null) {
                     mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
                 }
-                Log.d("turnipwarwick", "Lonk Click: " + url);
+                Log.d("turnipwarwick", "Long Click: " + url);
                 getDownloadRequest(new ValueCallback<DownloadRequest>() {
                     @Override
                     public void onReceiveValue(DownloadRequest value) {
@@ -127,9 +127,9 @@ public class ModuleViewActivity extends WebViewActivity implements RedownloadFil
                 Uri destinationUri = Uri.parse(destinationJDKUri.toString());
                 String baseName = requestURI.getLastPathSegment();
 
-                Log.e("turnipwarwick", "Requested URI: " + requestURI);
-                Log.e("turnipwarwick", "Cookies: " + cookie);
-                Log.e("turnipwarwick", "Downloading to " + destinationUri);
+                //Log.e("turnipwarwick", "Requested URI: " + requestURI);
+                //Log.e("turnipwarwick", "Cookies: " + cookie);
+                //Log.e("turnipwarwick", "Downloading to " + destinationUri);
 
                 DownloadManager.Request request = new DownloadManager.Request(requestURI)
                         .addRequestHeader("Cookie", cookie)
@@ -194,10 +194,10 @@ public class ModuleViewActivity extends WebViewActivity implements RedownloadFil
 
     private void getFolderName(ValueCallback<String> callback) {
         Uri currentUri = Uri.parse(webView.getUrl());
-        Log.e("turnipwarwick", currentUri.toString());
+        //Log.e("turnipwarwick", currentUri.toString());
         if (currentUri.getHost().equals("moodle.warwick.ac.uk")
                 && currentUri.getPath().startsWith("/mod/folder/view.php")) {
-            Log.e("turnipwarwick", "Fits folder definition");
+            //Log.e("turnipwarwick", "Fits folder definition");
             extractMoodleFolderName(callback);
         } else
             callback.onReceiveValue("");

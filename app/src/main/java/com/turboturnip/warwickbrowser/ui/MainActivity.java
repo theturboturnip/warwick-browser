@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
             final long moduleId = data.getLongExtra(MODULE_ID, -1);
             final String linkName = data.getStringExtra("LINK_NAME");
             final String linkTarget = data.getStringExtra("LINK_TARGET");
-            Log.e("turnipwarwick", "Got data back from link selection: " + moduleId + " : " + linkName + " : " + linkTarget);
+            Log.d("turnipwarwick", "Got data back from link selection: " + moduleId + " : " + linkName + " : " + linkTarget);
             new AsyncDBModuleLinkInsert(moduleDatabase, new ModuleLink(moduleId, linkName, linkTarget)).execute();
         } else {
             super.onActivityResult(requestCode, resultCode, data);
