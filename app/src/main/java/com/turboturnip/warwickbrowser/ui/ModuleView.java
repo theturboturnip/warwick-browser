@@ -226,18 +226,18 @@ class ModuleFileView extends RecyclerView.ViewHolder {
     }
     void setDirectory(File directory, boolean isFirst) {
         textView.setText(directory.getName());
-        textView.setOnClickListener(null);
+        itemView.setOnClickListener(null);
         dividerView.setVisibility(isFirst ? View.GONE : View.VISIBLE);
         indentView.setVisibility(View.GONE);
     }
     void setFile(String fileName, final Intent openFileIntent, boolean isFirst, boolean indented) {
         textView.setText(fileName);
 
-
-
+        Log.v("turnipwarwick", "setFile " + fileName);
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d("turnipwarwick", "onClick " + fileName);
                 v.getContext().startActivity(openFileIntent);
             }
         });
@@ -249,10 +249,7 @@ class ModuleFileView extends RecyclerView.ViewHolder {
         textView.setText("No Files");
         dividerView.setVisibility(View.GONE);
         indentView.setVisibility(View.GONE);
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {}
-        });
+        itemView.setOnClickListener(null);
     }
 }
 
