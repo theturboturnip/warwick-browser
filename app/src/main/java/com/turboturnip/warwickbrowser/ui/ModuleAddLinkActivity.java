@@ -4,8 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,7 +13,7 @@ import android.webkit.DownloadListener;
 import com.turboturnip.warwickbrowser.ui.dialog.AddModuleLinkDialogFragment;
 import com.turboturnip.warwickbrowser.R;
 
-import static com.turboturnip.warwickbrowser.ui.ModuleViewActivity.MODULE_NAME;
+import static com.turboturnip.warwickbrowser.ui.ModuleWebViewActivity.MODULE_NAME;
 
 public class ModuleAddLinkActivity extends WebViewActivity implements AddModuleLinkDialogFragment.AddModuleLinkListener {
     public static final String MODULE_ID = "module-id";

@@ -26,7 +26,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.List;
 
-public class ModuleViewActivity extends WebViewActivity implements RedownloadFileDialogFragment.ShouldRedownloadListener, DownloadAsDialogFragment.DownloadAsListener {
+public class ModuleWebViewActivity extends WebViewActivity implements RedownloadFileDialogFragment.ShouldRedownloadListener, DownloadAsDialogFragment.DownloadAsListener {
 
     public final static String REQUESTED_PATH = "requested_url";
     public final static String MODULE_NAME = "module_name";
@@ -53,7 +53,7 @@ public class ModuleViewActivity extends WebViewActivity implements RedownloadFil
         super.onCreate(savedInstanceState);
 
         if (getIntent().getExtras() == null) {
-            Log.e("turnipwarwick", "ModuleViewActivity created without extras");
+            Log.e("turnipwarwick", "ModuleWebViewActivity created without extras");
             finish();
             return;
         }
@@ -69,14 +69,15 @@ public class ModuleViewActivity extends WebViewActivity implements RedownloadFil
         Uri targetUrl = Uri.parse(targetPath.startsWith("http") ? targetPath : "https://warwick.ac.uk/" + targetPath);
         //Log.e("turnipwarwick", "URI: " + targetUrl);
 
+        webView.setLongClickable(true);
         webView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 if (webView.getHitTestResult().getType() != WebView.HitTestResult.SRC_ANCHOR_TYPE)
-                    return true;
+                    return false;
                 String url = webView.getHitTestResult().getExtra();
                 if (url == null)
-                    return true;
+                    return false;
                 String extension = MimeTypeMap.getFileExtensionFromUrl(url);
                 String mimetype = "";
                 if (extension != null) {

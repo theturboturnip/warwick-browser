@@ -20,10 +20,7 @@ import com.turboturnip.warwickbrowser.R;
 import com.turboturnip.warwickbrowser.SortBy;
 import com.turboturnip.warwickbrowser.Statics;
 import com.turboturnip.warwickbrowser.db.ModuleAndLinks;
-import com.turboturnip.warwickbrowser.db.ModuleDatabase;
 import com.turboturnip.warwickbrowser.db.ModuleLink;
-import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleCreate;
-import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleDelete;
 import com.turboturnip.warwickbrowser.ui.dialog.DeleteModuleDialogFragment;
 import com.turboturnip.warwickbrowser.ui.dialog.UpdateDescriptionDialogFragment;
 import com.turboturnip.warwickbrowser.ui.dialog.UpdateSortDialogFragment;
@@ -134,7 +131,7 @@ public class ModuleView extends RecyclerView.ViewHolder {
                     case R.id.action_add_link: {
                         Intent intent = new Intent(activity.get(), ModuleAddLinkActivity.class);
                         intent.putExtra(MODULE_ID, data.module.id);
-                        intent.putExtra(ModuleViewActivity.MODULE_NAME, data.module.title);
+                        intent.putExtra(ModuleWebViewActivity.MODULE_NAME, data.module.title);
                         activity.get().startActivityForResult(intent, 0);
                         break;
                     }
@@ -205,9 +202,9 @@ class ModuleLinkView extends RecyclerView.ViewHolder {
         linkButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), ModuleViewActivity.class);
-                intent.putExtra(ModuleViewActivity.MODULE_NAME, moduleData.module.title);
-                intent.putExtra(ModuleViewActivity.REQUESTED_PATH, link.target);
+                Intent intent = new Intent(v.getContext(), ModuleWebViewActivity.class);
+                intent.putExtra(ModuleWebViewActivity.MODULE_NAME, moduleData.module.title);
+                intent.putExtra(ModuleWebViewActivity.REQUESTED_PATH, link.target);
                 v.getContext().startActivity(intent);
             }
         });

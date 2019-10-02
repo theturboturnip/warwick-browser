@@ -32,7 +32,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.ModuleViewActivity"
+            android:name=".ui.ModuleWebViewActivity"
             android:label="@string/title_activity_module_web_view"
             android:parentActivityName=".ui.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
