@@ -79,10 +79,9 @@ public class ModuleWebViewActivity extends WebViewActivity implements Redownload
                 if (url == null)
                     return false;
                 String extension = MimeTypeMap.getFileExtensionFromUrl(url);
-                String mimetype = "";
-                if (extension != null) {
-                    mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                }
+                if (extension == null)
+                    return false;
+                String mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
                 Log.d("turnipwarwick", "Long Click: " + url);
                 getDownloadRequest(new ValueCallback<DownloadRequest>() {
                     @Override
