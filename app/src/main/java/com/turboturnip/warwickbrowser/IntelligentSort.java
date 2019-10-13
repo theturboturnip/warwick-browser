@@ -31,7 +31,7 @@ public class IntelligentSort {
         }
 
         // There's a partial type match
-        for (i = 0; i < tokens1.size() && i < tokens2.size(); i++) {
+        for (i = 0; i < firstNMatchingTypes; i++) {
             int comparison = 0;
             Token t1 = tokens1.get(i), t2 = tokens2.get(i);
             if (t1.type == 0) {
