@@ -76,6 +76,7 @@ public class ModuleAddLinkActivity extends WebViewActivity implements AddModuleL
 
     @Override
     public void onModuleLinkAdded(String title, String path) {
+        Log.e("turnipwarwick", "Adding module link named " + title + " with path " + path);
         Intent data = new Intent();
         data.putExtra(MODULE_ID, moduleId);
         data.putExtra("LINK_NAME", title);
