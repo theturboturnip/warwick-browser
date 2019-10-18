@@ -37,7 +37,7 @@ public class IntelligentSort {
             if (t1.type == 0) {
                 comparison = intCompare.compare(Integer.parseInt(t1.token), Integer.parseInt(t2.token));
             } else {
-                comparison = t1.token.compareTo(t2.token);
+                comparison = t1.token.toLowerCase().compareTo(t2.token.toLowerCase());
             }
             if (comparison != 0)
                 return comparison;
