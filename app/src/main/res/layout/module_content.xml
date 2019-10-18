@@ -36,7 +36,7 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/links"
-        android:layout_width="wrap_content"
+        android:layout_width="132sp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
