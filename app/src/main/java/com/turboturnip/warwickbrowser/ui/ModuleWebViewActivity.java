@@ -18,6 +18,7 @@ import android.webkit.MimeTypeMap;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
 
+import com.turboturnip.warwickbrowser.WarwickUrls;
 import com.turboturnip.warwickbrowser.ui.dialog.DownloadAsDialogFragment;
 import com.turboturnip.warwickbrowser.ui.dialog.RedownloadFileDialogFragment;
 import com.turboturnip.warwickbrowser.Statics;
@@ -66,8 +67,8 @@ public class ModuleWebViewActivity extends WebViewActivity implements Redownload
             actionBar.setTitle(moduleName);
         }
 
-        Uri targetUrl = Uri.parse(targetPath.startsWith("http") ? targetPath : "https://warwick.ac.uk/" + targetPath);
-        //Log.e("turnipwarwick", "URI: " + targetUrl);
+        Uri targetUrl = WarwickUrls.resolveUrl(targetPath);//Uri.parse(targetPath.startsWith("http") ? targetPath : "https://" + targetPath);
+        Log.e("turnipwarwick", "URI: " + targetUrl);
 
         webView.setLongClickable(true);
         webView.setOnLongClickListener(new View.OnLongClickListener() {
