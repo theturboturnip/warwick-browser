@@ -74,12 +74,8 @@ public class SingleModuleActivity extends AppCompatActivity implements ModuleDia
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable final Intent data) {
-        if (requestCode == 0 && data != null) {
-            final long moduleId = data.getLongExtra(MODULE_ID, -1);
-            final String linkName = data.getStringExtra("LINK_NAME");
-            final String linkTarget = data.getStringExtra("LINK_TARGET");
-            Log.d("turnipwarwick", "Got data back from link selection: " + moduleId + " : " + linkName + " : " + linkTarget);
-            new AsyncDBModuleLinkInsert(ModuleDatabase.getDatabase(this), new ModuleLink(moduleId, linkName, linkTarget)).execute();
+        if (requestCode == 0 && data != null && data.getStringExtra(ModuleAddLinkActivity.class.getCanonicalName()) != null) {
+            Log.d("turnipwarwick", "Link creation finished, killing self");
             finish();
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -101,6 +97,12 @@ public class SingleModuleActivity extends AppCompatActivity implements ModuleDia
     @Override
     public void onSortUpdateRequested(long moduleId, SortBy newSort) {
         new AsyncDBModuleUpdateSortBy(ModuleDatabase.getDatabase(this), moduleId, newSort).execute();
+        finish();
+    }
+
+    @Override
+    public void onModuleLinkAdded(long moduleId, String title, String selected) {
+        new AsyncDBModuleLinkInsert(ModuleDatabase.getDatabase(this), new ModuleLink(moduleId, title, selected)).execute();
         finish();
     }
 }

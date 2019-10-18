@@ -10,6 +10,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.DownloadListener;
 
+import com.turboturnip.warwickbrowser.db.ModuleDatabase;
+import com.turboturnip.warwickbrowser.db.ModuleLink;
+import com.turboturnip.warwickbrowser.db.actions.AsyncDBModuleLinkInsert;
 import com.turboturnip.warwickbrowser.ui.dialog.AddModuleLinkDialogFragment;
 import com.turboturnip.warwickbrowser.R;
 
@@ -34,7 +37,7 @@ public class ModuleAddLinkActivity extends WebViewActivity implements AddModuleL
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_select:
-                AddModuleLinkDialogFragment newFragment = new AddModuleLinkDialogFragment();
+                AddModuleLinkDialogFragment newFragment = AddModuleLinkDialogFragment.newInstance(moduleId, moduleName, webView.getUrl());
                 newFragment.show(getSupportFragmentManager(), "addModuleLink");
                 return true;
             default:
@@ -70,18 +73,13 @@ public class ModuleAddLinkActivity extends WebViewActivity implements AddModuleL
     }
 
     @Override
-    public String getLinkTarget() {
-        return webView.getUrl();
-    }
-
-    @Override
-    public void onModuleLinkAdded(String title, String path) {
+    public void onModuleLinkAdded(long moduleId, String title, String path) {
         Log.e("turnipwarwick", "Adding module link named " + title + " with path " + path);
         Intent data = new Intent();
-        data.putExtra(MODULE_ID, moduleId);
-        data.putExtra("LINK_NAME", title);
-        data.putExtra("LINK_TARGET", path);
+        data.putExtra(ModuleAddLinkActivity.class.getCanonicalName(), "DONE");
         setResult(0, data);
+        new AsyncDBModuleLinkInsert(ModuleDatabase.getDatabase(this), new ModuleLink(moduleId, title, path)).execute();
+
         finish();
     }
 }

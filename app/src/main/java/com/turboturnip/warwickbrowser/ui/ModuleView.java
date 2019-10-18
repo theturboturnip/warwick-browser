@@ -21,6 +21,7 @@ import com.turboturnip.warwickbrowser.SortBy;
 import com.turboturnip.warwickbrowser.Statics;
 import com.turboturnip.warwickbrowser.db.ModuleAndLinks;
 import com.turboturnip.warwickbrowser.db.ModuleLink;
+import com.turboturnip.warwickbrowser.ui.dialog.AddModuleLinkDialogFragment;
 import com.turboturnip.warwickbrowser.ui.dialog.DeleteModuleDialogFragment;
 import com.turboturnip.warwickbrowser.ui.dialog.UpdateDescriptionDialogFragment;
 import com.turboturnip.warwickbrowser.ui.dialog.UpdateSortDialogFragment;
@@ -128,11 +129,16 @@ public class ModuleView extends RecyclerView.ViewHolder {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()){
-                    case R.id.action_add_link: {
+                    case R.id.action_add_link_browser: {
                         Intent intent = new Intent(activity.get(), ModuleAddLinkActivity.class);
                         intent.putExtra(MODULE_ID, data.module.id);
                         intent.putExtra(ModuleWebViewActivity.MODULE_NAME, data.module.title);
                         activity.get().startActivityForResult(intent, 0);
+                        break;
+                    }
+                    case R.id.action_add_link_manual: {
+                        AddModuleLinkDialogFragment newFragment = AddModuleLinkDialogFragment.newInstance(data.module, "");
+                        newFragment.show(activity.get().getSupportFragmentManager(), "addLinkManual");
                         break;
                     }
                     case R.id.action_delete_module: {

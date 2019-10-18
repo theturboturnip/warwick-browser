@@ -216,4 +216,9 @@ public class MainActivity extends AppCompatActivity implements AddModuleDialogFr
     public void onSortUpdateRequested(long moduleId, SortBy newSort) {
         new AsyncDBModuleUpdateSortBy(ModuleDatabase.getDatabase(this), moduleId, newSort).execute();
     }
+
+    @Override
+    public void onModuleLinkAdded(long moduleId, String title, String selected) {
+        new AsyncDBModuleLinkInsert(ModuleDatabase.getDatabase(this), new ModuleLink(moduleId, title, selected)).execute();
+    }
 }
