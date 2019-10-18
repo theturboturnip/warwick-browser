@@ -42,7 +42,10 @@ public class IntelligentSort {
             if (comparison != 0)
                 return comparison;
         }
-        return tokens1.size() - tokens2.size();
+        int comparison = tokens1.size() - tokens2.size();
+        if (comparison == 0)
+            return a.compareTo(b);
+        return comparison;
     }
 
     static class Token {
