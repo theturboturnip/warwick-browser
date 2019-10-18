@@ -152,7 +152,8 @@ public class ModuleWebViewActivity extends WebViewActivity implements Redownload
         tryDownload(request, false);
     }
     private void tryDownload(DownloadRequest request, boolean shouldRename) {
-        if (shouldRename || new File(request.destinationUri.getPath()).exists()) {
+        File destinationFile = new File(request.destinationUri.getPath());
+        if (shouldRename || destinationFile.exists() || !destinationFile.getName().contains(".")) {
             // Already exists, ask user if they want to download it again
             int id = nextRequestId++;
             requests.put(id, request);
